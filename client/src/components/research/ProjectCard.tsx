@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Github, Database } from "lucide-react";
+import { Github, Database, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@shared/schema";
 
@@ -16,16 +16,17 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="text-xl">{project.title}</CardTitle>
-          <div className="text-sm text-muted-foreground">
+      <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+        <CardHeader className="space-y-4">
+          <CardTitle className="text-2xl font-medium">{project.title}</CardTitle>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Users className="h-4 w-4 mr-2" />
             {project.authors.join(", ")}
           </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm mb-4">{project.abstract}</p>
-          <div className="flex gap-2">
+        <CardContent className="space-y-6">
+          <p className="text-base leading-relaxed">{project.abstract}</p>
+          <div className="flex flex-wrap gap-3">
             {project.datasetLink && (
               <Button
                 variant="outline"
@@ -35,6 +36,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     window.open(project.datasetLink, "_blank");
                   }
                 }}
+                className="hover:bg-secondary/80"
               >
                 <Database className="h-4 w-4 mr-2" />
                 Dataset
@@ -49,9 +51,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     window.open(project.githubLink, "_blank");
                   }
                 }}
+                className="hover:bg-secondary/80"
               >
                 <Github className="h-4 w-4 mr-2" />
-                Code
+                Code Repository
               </Button>
             )}
           </div>

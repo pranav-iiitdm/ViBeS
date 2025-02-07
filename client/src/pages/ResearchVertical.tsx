@@ -53,10 +53,10 @@ export default function ResearchVertical({ params: { category } }: Props) {
       >
         <div className="relative h-[300px] mb-16 rounded-lg overflow-hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 hover:scale-105"
             style={{ backgroundImage: `url(${info.image})` }}
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div className="absolute inset-0 flex flex-col justify-center px-8">
             <motion.h1
               variants={fadeIn}
@@ -73,14 +73,23 @@ export default function ResearchVertical({ params: { category } }: Props) {
           </div>
         </div>
 
-        <motion.div
-          variants={staggerChildren}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-        >
-          {projects.map(project => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </motion.div>
+        {projects.length === 0 ? (
+          <motion.div
+            variants={fadeIn}
+            className="text-center py-16 text-muted-foreground"
+          >
+            No projects found in this category yet.
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={staggerChildren}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
+            {projects.map(project => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );
