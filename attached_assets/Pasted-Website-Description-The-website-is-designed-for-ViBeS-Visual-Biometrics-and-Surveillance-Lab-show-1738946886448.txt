@@ -1,0 +1,37 @@
+Website Description
+The website is designed for ViBeS (Visual Biometrics and Surveillance Lab), showcasing the research work in various domains. It provides a structured overview of ongoing and completed research projects, categorized into four primary verticals:
+
+Visual Surveillance
+Edge Computing
+Generative Models
+Biometrics
+Each research vertical has a dedicated page that lists projects related to that specific field, including project titles, abstracts, author names, dataset links, and GitHub repositories.
+
+Website Structure
+Home Page: Provides an introduction to the ViBeS lab and an overview of its research domains.
+About Page: Details about the lab’s mission, research focus, and contributions.
+Team Page: Showcases the researchers, faculty members, and students involved in various projects.
+Students Page: Highlights student contributions to research projects.
+Gallery Page: Displays images related to research activities, lab work, and events.
+Contact Page: Offers contact information for inquiries and collaboration opportunities.
+Research Section
+The Research Page presents an overview of different research domains. Each section contains:
+
+A representative image for the research domain.
+A brief description of the research focus.
+A link to a dedicated page listing all research projects in that domain.
+Each research vertical page (e.g., visual_surveillance.html, edge_computing.html, generative_models.html, biometrics.html) follows a structured format:
+
+A header describing the domain.
+A list of research projects under that domain, including:
+Project Title (clickable link to the publication or more details).
+Abstract providing a brief overview.
+Author Names.
+Dataset Link (if available).
+GitHub Repository link (if applicable).
+Design and Aesthetic
+The website maintains a clean, modern, and research-oriented look, with a soft color scheme (beige, peach, and white).
+Navigation Bar allows easy access to different sections.
+Responsive Design ensures compatibility across devices.
+Interactive Elements like clickable sections and hover effects for a seamless user experience.
+This website serves as a comprehensive repository of research efforts within ViBeS, providing easy access to ongoing projects, publications, and resources.
