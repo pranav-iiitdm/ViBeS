@@ -1,38 +1,36 @@
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { fadeIn, staggerChildren } from "@/lib/animations";
-import ProjectCard from "@/components/research/ProjectCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Project } from "@shared/schema";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "wouter";
 
 const categories = [
   {
     id: "visual_surveillance",
     label: "Visual Surveillance",
-    description: "Advanced algorithms for intelligent surveillance systems"
+    description: "Advanced algorithms for intelligent surveillance systems",
+    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69"
   },
   {
     id: "edge_computing",
     label: "Edge Computing",
-    description: "Optimized solutions for edge devices"
+    description: "Optimized solutions for edge devices",
+    image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
   },
   {
     id: "generative_models",
     label: "Generative Models",
-    description: "State-of-the-art generative AI research"
+    description: "State-of-the-art generative AI research",
+    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5"
   },
   {
     id: "biometrics",
     label: "Biometrics",
-    description: "Advanced biometric recognition systems"
+    description: "Advanced biometric recognition systems",
+    image: "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf"
   }
 ];
 
 export default function Research() {
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"]
-  });
-
   return (
     <div className="container px-4 py-16">
       <motion.div
@@ -54,38 +52,34 @@ export default function Research() {
           Explore our cutting-edge research across various domains of computer vision and biometrics.
         </motion.p>
 
-        <Tabs defaultValue="visual_surveillance" className="mb-16">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-4 w-full">
-            {categories.map(category => (
-              <TabsTrigger key={category.id} value={category.id}>
-                {category.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
+        <motion.div
+          variants={staggerChildren}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        >
           {categories.map(category => (
-            <TabsContent key={category.id} value={category.id}>
+            <Link key={category.id} href={`/research/${category.id}`}>
               <motion.div
-                variants={staggerChildren}
-                initial="initial"
-                animate="animate"
+                variants={fadeIn}
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                className="cursor-pointer"
               >
-                <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-4">{category.label}</h2>
-                  <p className="text-muted-foreground">{category.description}</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {projects
-                    .filter(project => project.category === category.id)
-                    .map(project => (
-                      <ProjectCard key={project.id} project={project} />
-                    ))}
-                </div>
+                <Card className="overflow-hidden h-full">
+                  <CardContent className="p-0">
+                    <div
+                      className="h-48 bg-cover bg-center transform transition-transform duration-700 hover:scale-110"
+                      style={{ backgroundImage: `url(${category.image})` }}
+                    />
+                    <div className="p-6">
+                      <h2 className="text-2xl font-semibold mb-2">{category.label}</h2>
+                      <p className="text-muted-foreground">{category.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
-            </TabsContent>
+            </Link>
           ))}
-        </Tabs>
+        </motion.div>
       </motion.div>
     </div>
   );

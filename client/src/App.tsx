@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Home from "@/pages/Home";
 import Research from "@/pages/Research";
+import ResearchVertical from "@/pages/ResearchVertical";
 import Team from "@/pages/Team";
 import Students from "@/pages/Students";
 import Publications from "@/pages/Publications";
@@ -20,6 +21,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/research" component={Research} />
+          <Route path="/research/:category" component={ResearchVertical} />
           <Route path="/team" component={Team} />
           <Route path="/students" component={Students} />
           <Route path="/publications" component={Publications} />
