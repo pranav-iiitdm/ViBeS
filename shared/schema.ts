@@ -28,7 +28,8 @@ export const teamMembers = pgTable("team_members", {
   role: text("role").notNull(),
   bio: text("bio").notNull(),
   image: text("image"),
-  publications: json("publications").$type<{title: string, link: string}[]>(),
+  googleScholarUrl: text("google_scholar_url"),
+  researchGateUrl: text("research_gate_url"),
   researchInterests: text("research_interests").array(),
 });
 

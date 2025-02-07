@@ -68,11 +68,20 @@ export class MemStorage implements IStorage {
       name: "Dr. Jane Smith",
       role: "Principal Investigator",
       bio: "Leading researcher in computer vision and biometrics with over 15 years of experience.",
-      image: "https://example.com/jane-smith.jpg",
-      publications: [
-        { title: "Deep Learning in Biometrics", link: "https://doi.org/10.1234/paper2" }
-      ],
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
+      googleScholarUrl: "https://scholar.google.com/citations?user=example",
+      researchGateUrl: "https://www.researchgate.net/profile/example",
       researchInterests: ["Computer Vision", "Deep Learning", "Biometrics"]
+    },
+    {
+      id: 2,
+      name: "Dr. John Davis",
+      role: "Senior Researcher",
+      bio: "Expert in deep learning and pattern recognition systems.",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+      googleScholarUrl: "https://scholar.google.com/citations?user=example2",
+      researchGateUrl: "https://www.researchgate.net/profile/example2",
+      researchInterests: ["Pattern Recognition", "Machine Learning", "Neural Networks"]
     }
   ];
 
@@ -88,7 +97,20 @@ export class MemStorage implements IStorage {
         }
       ],
       researchInterests: ["Deep Learning", "Computer Vision"],
-      image: "https://example.com/john-doe.jpg"
+      image: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&h=400&fit=crop"
+    },
+    {
+      id: 2,
+      name: "Sarah Wilson",
+      degree: "Masters Student",
+      projects: [
+        {
+          title: "Edge Computing for IoT",
+          description: "Developing efficient algorithms for edge devices."
+        }
+      ],
+      researchInterests: ["Edge Computing", "IoT"],
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop"
     }
   ];
 

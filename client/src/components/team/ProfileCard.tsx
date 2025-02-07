@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { SiGooglescholar, SiResearchgate } from "react-icons/si";
 import type { TeamMember, Student } from "@shared/schema";
 
 interface ProfileCardProps {
@@ -23,11 +25,15 @@ export default function ProfileCard({ profile, type }: ProfileCardProps) {
     >
       <Card className="h-full">
         <CardHeader className="text-center">
-          <Avatar className="w-24 h-24 mx-auto mb-4">
+          <Avatar className="w-32 h-32 mx-auto mb-4">
             {profile.image ? (
-              <AvatarImage src={profile.image} alt={profile.name} />
+              <AvatarImage 
+                src={profile.image} 
+                alt={profile.name}
+                className="object-cover"
+              />
             ) : (
-              <AvatarFallback>{initials}</AvatarFallback>
+              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             )}
           </Avatar>
           <h3 className="text-xl font-semibold">{profile.name}</h3>
@@ -38,37 +44,53 @@ export default function ProfileCard({ profile, type }: ProfileCardProps) {
         <CardContent>
           {type === "team" ? (
             <>
-              <p className="text-sm mb-4">{(profile as TeamMember).bio}</p>
-              {(profile as TeamMember).publications && (
-                <div className="mt-4">
-                  <h4 className="font-semibold mb-2">Publications</h4>
-                  <ul className="text-sm space-y-1">
-                    {(profile as TeamMember).publications?.map((pub, i) => (
-                      <li key={i}>
-                        <a
-                          href={pub.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          {pub.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <p className="text-sm mb-6">{(profile as TeamMember).bio}</p>
+              {/* Academic Profile Links */}
+              <div className="flex justify-center gap-3 mb-6">
+                {type === "team" && (profile as TeamMember).googleScholarUrl && (
+                  <a
+                    href={(profile as TeamMember).googleScholarUrl || ""}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <SiGooglescholar className="w-4 h-4" />
+                      Google Scholar
+                    </Button>
+                  </a>
+                )}
+                {type === "team" && (profile as TeamMember).researchGateUrl && (
+                  <a
+                    href={(profile as TeamMember).researchGateUrl || ""}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <SiResearchgate className="w-4 h-4" />
+                      ResearchGate
+                    </Button>
+                  </a>
+                )}
+              </div>
             </>
           ) : (
             <>
               {(profile as Student).projects && (
                 <div className="mt-4">
                   <h4 className="font-semibold mb-2">Projects</h4>
-                  <ul className="text-sm space-y-1">
+                  <ul className="text-sm space-y-3">
                     {(profile as Student).projects?.map((project, i) => (
-                      <li key={i}>
+                      <li key={i} className="bg-secondary/20 rounded-lg p-3">
                         <strong>{project.title}</strong>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground mt-1">
                           {project.description}
                         </p>
                       </li>
@@ -78,15 +100,15 @@ export default function ProfileCard({ profile, type }: ProfileCardProps) {
               )}
             </>
           )}
-          
+
           {profile.researchInterests && (
-            <div className="mt-4">
+            <div className="mt-6">
               <h4 className="font-semibold mb-2">Research Interests</h4>
               <div className="flex flex-wrap gap-2">
                 {profile.researchInterests.map((interest, i) => (
                   <span
                     key={i}
-                    className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full"
+                    className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
                   >
                     {interest}
                   </span>
