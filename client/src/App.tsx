@@ -10,6 +10,7 @@ import ResearchVertical from "@/pages/ResearchVertical";
 import Team from "@/pages/Team";
 import Students from "@/pages/Students";
 import Publications from "@/pages/Publications";
+import Gallery from "@/pages/Gallery";
 import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
 
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/team" component={Team} />
           <Route path="/students" component={Students} />
           <Route path="/publications" component={Publications} />
+          <Route path="/gallery" component={Gallery} />
           <Route path="/contact" component={Contact} />
           <Route component={NotFound} />
         </Switch>

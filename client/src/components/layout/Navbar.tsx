@@ -8,6 +8,7 @@ const routes = [
   { path: "/team", label: "Team" },
   { path: "/students", label: "Students" },
   { path: "/publications", label: "Publications" },
+  { path: "/gallery", label: "Gallery" },
   { path: "/contact", label: "Contact" }
 ];
 
