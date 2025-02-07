@@ -2,6 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { fadeIn, staggerChildren } from "@/lib/animations";
 import ProjectCard from "@/components/research/ProjectCard";
+import ProjectTimeline from "@/components/research/ProjectTimeline";
+import { Button } from "@/components/ui/button";
+import { LayoutGrid, Clock } from "lucide-react";
+import { useState } from "react";
 import type { Project } from "@shared/schema";
 
 const categoryInfo = {
@@ -34,6 +38,7 @@ interface Props {
 }
 
 export default function ResearchVertical({ params: { category } }: Props) {
+  const [view, setView] = useState<"grid" | "timeline">("grid");
   const info = categoryInfo[category];
 
   const { data: projects = [] } = useQuery<Project[]>({
@@ -73,6 +78,30 @@ export default function ResearchVertical({ params: { category } }: Props) {
           </div>
         </div>
 
+        {projects.length > 0 && (
+          <motion.div
+            variants={fadeIn}
+            className="flex justify-end mb-8 gap-2"
+          >
+            <Button
+              variant={view === "grid" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("grid")}
+            >
+              <LayoutGrid className="h-4 w-4 mr-2" />
+              Grid View
+            </Button>
+            <Button
+              variant={view === "timeline" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("timeline")}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Timeline
+            </Button>
+          </motion.div>
+        )}
+
         {projects.length === 0 ? (
           <motion.div
             variants={fadeIn}
@@ -80,7 +109,7 @@ export default function ResearchVertical({ params: { category } }: Props) {
           >
             No projects found in this category yet.
           </motion.div>
-        ) : (
+        ) : view === "grid" ? (
           <motion.div
             variants={staggerChildren}
             className="grid grid-cols-1 md:grid-cols-2 gap-8"
@@ -89,6 +118,8 @@ export default function ResearchVertical({ params: { category } }: Props) {
               <ProjectCard key={project.id} project={project} />
             ))}
           </motion.div>
+        ) : (
+          <ProjectTimeline projects={projects} />
         )}
       </motion.div>
     </div>
