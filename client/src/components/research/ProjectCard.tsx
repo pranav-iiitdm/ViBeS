@@ -30,7 +30,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(project.datasetLink, "_blank")}
+                onClick={() => {
+                  if (project.datasetLink) {
+                    window.open(project.datasetLink, "_blank");
+                  }
+                }}
               >
                 <Database className="h-4 w-4 mr-2" />
                 Dataset
@@ -40,7 +44,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(project.githubLink, "_blank")}
+                onClick={() => {
+                  if (project.githubLink) {
+                    window.open(project.githubLink, "_blank");
+                  }
+                }}
               >
                 <Github className="h-4 w-4 mr-2" />
                 Code

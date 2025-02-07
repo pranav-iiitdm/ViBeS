@@ -19,28 +19,28 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/">
-            <motion.div
+            <motion.span
               whileHover={{ scale: 1.05 }}
-              className="text-xl font-bold"
+              className="text-xl font-bold cursor-pointer"
             >
               ViBeS Lab
-            </motion.div>
+            </motion.span>
           </Link>
 
           <div className="hidden md:flex space-x-8">
             {routes.map(route => (
               <Link key={route.path} href={route.path}>
-                <motion.a
+                <motion.span
                   whileHover={{ y: -2 }}
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
+                    "text-sm font-medium transition-colors hover:text-primary cursor-pointer",
                     location === route.path
                       ? "text-primary"
                       : "text-muted-foreground"
                   )}
                 >
                   {route.label}
-                </motion.a>
+                </motion.span>
               </Link>
             ))}
           </div>
