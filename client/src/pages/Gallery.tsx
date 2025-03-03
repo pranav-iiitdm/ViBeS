@@ -4,40 +4,40 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const galleryImages = [
   {
-    title: "Lab Setup",
-    description: "Our state-of-the-art research facility",
-    image: "https://images.unsplash.com/photo-1563974604538-67f52beb353a"
+    title: "Rover",
+    description: "One of Rover used to collect the images",
+    image: "/rover1.jpg"
   },
   {
-    title: "Team Meeting",
-    description: "Weekly research discussion",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c"
+    title: "Rover",
+    description: "One of Rover used to collect the images",
+    image: "/rover2.jpg"
   },
   {
-    title: "Research Demo",
-    description: "Demonstrating our latest biometric system",
-    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69"
+    title: "Rover",
+    description: "One of Rover used to collect the imagesm",
+    image: "/rover3.jpg"
   },
-  {
-    title: "Conference Presentation",
-    description: "Presenting our work at CVPR",
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5"
-  },
-  {
-    title: "Student Workshop",
-    description: "Training session on deep learning",
-    image: "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf"
-  },
-  {
-    title: "Lab Equipment",
-    description: "High-performance computing cluster",
-    image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
-  }
+  // {
+  //   title: "Rover",
+  //   description: "Presenting our work at CVPR",
+  //   image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5"
+  // },
+  // {
+  //   title: "Student Workshop",
+  //   description: "Training session on deep learning",
+  //   image: "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf"
+  // },
+  // {
+  //   title: "Lab Equipment",
+  //   description: "High-performance computing cluster",
+  //   image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
+  // }
 ];
 
 export default function Gallery() {
   return (
-    <div className="container px-4 py-16">
+    <div className="container px-4 py-16 mx-auto">
       <motion.div
         variants={staggerChildren}
         initial="initial"

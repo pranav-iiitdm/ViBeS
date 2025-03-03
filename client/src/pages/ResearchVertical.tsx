@@ -5,7 +5,7 @@ import ProjectCard from "@/components/research/ProjectCard";
 import ProjectTimeline from "@/components/research/ProjectTimeline";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, Clock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Project } from "@shared/schema";
 
 const categoryInfo = {
@@ -38,7 +38,7 @@ interface Props {
 }
 
 export default function ResearchVertical({ params: { category } }: Props) {
-  const [view, setView] = useState<"grid" | "timeline">("grid");
+  const [view, setView] = useState<"grid" | "timeline">("timeline");
   const info = categoryInfo[category];
 
   const { data: projects = [] } = useQuery<Project[]>({
@@ -50,7 +50,7 @@ export default function ResearchVertical({ params: { category } }: Props) {
   }
 
   return (
-    <div className="container px-4 py-16">
+    <div className="container px-4 py-16 mx-auto">
       <motion.div
         variants={staggerChildren}
         initial="initial"

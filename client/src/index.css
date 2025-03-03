@@ -5,6 +5,7 @@
 @layer base {
   * {
     @apply border-border;
+    /* background-color: red; */
   }
 
   body {

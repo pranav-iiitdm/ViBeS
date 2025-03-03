@@ -9,8 +9,8 @@ export default function Footer() {
       animate="animate"
       className="bg-background border-t mt-auto"
     >
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="font-semibold mb-4">ViBeS Lab</h3>
             <p className="text-sm text-muted-foreground">
@@ -34,11 +34,11 @@ export default function Footer() {
               City, State 12345
             </p>
           </div>
-        </div>
-        
-        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} ViBeS Lab. All rights reserved.
-        </div>
+        </div> */}
+        © {new Date().getFullYear()} ViBeS Lab. All rights reserved.
+        {/* <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground text-sm text-[#F59C7D]"> */}
+          {/* © {new Date().getFullYear()} ViBeS Lab. All rights reserved. */}
+        {/* </div> */}
       </div>
     </motion.footer>
   );

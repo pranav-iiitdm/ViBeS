@@ -10,7 +10,7 @@ export default function Team() {
   });
 
   return (
-    <div className="container px-4 py-16">
+    <div className="container px-4 py-16 mx-auto">
       <motion.div
         variants={staggerChildren}
         initial="initial"

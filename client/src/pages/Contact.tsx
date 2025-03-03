@@ -5,7 +5,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Contact() {
   return (
-    <div className="container px-4 py-16">
+    <div className="container px-4 py-16 mx-auto">
       <motion.div
         variants={fadeIn}
         initial="initial"
@@ -31,11 +31,12 @@ export default function Contact() {
               height="100%"
               frameBorder="0"
               style={{ border: 0 }}
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00649682427088!3d40.71329937132881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2sNew%20York%20University!5e0!3m2!1sen!2sus!4v1695489762967!5m2!1sen!2sus"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3890.0691379219925!2d80.13465372507417!3d12.83880883746449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525851fbcd3b6b%3A0x9f1067aa71e3898e!2sIndian%20Institute%20of%20Information%20Technology%2C%20Design%20and%20Manufacturing%2C%20Kancheepuram!5e0!3m2!1sen!2sin!4v1738988934402!5m2!1sen!2sin"
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
+
           </motion.div>
 
           <div className="space-y-6">
@@ -57,7 +58,7 @@ export default function Contact() {
                   <Phone className="h-6 w-6 text-primary" />
                   <div>
                     <h3 className="font-semibold">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                    <p className="text-muted-foreground">+91 99999 99999</p>
                   </div>
                 </div>
               </CardContent>
@@ -71,8 +72,8 @@ export default function Contact() {
                     <h3 className="font-semibold">Address</h3>
                     <p className="text-muted-foreground">
                       Department of Computer Science<br />
-                      University Campus<br />
-                      City, State 12345
+                      IIITDM Kancheepuram<br />
+                      Chennai, TamilNadu 600127
                     </p>
                   </div>
                 </div>

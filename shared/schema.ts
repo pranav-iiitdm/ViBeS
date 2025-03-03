@@ -9,6 +9,7 @@ export const projects = pgTable("projects", {
   authors: text("authors").array().notNull(),
   datasetLink: text("dataset_link"),
   githubLink: text("github_link"),
+  date: text("date").notNull(),
   category: text("category").notNull(), // visual_surveillance, edge_computing, generative_models, biometrics
 });
 
@@ -20,6 +21,7 @@ export const publications = pgTable("publications", {
   venue: text("venue").notNull(),
   link: text("link"),
   abstract: text("abstract"),
+  type: text("type").notNull(), // journal, conference, workshop
 });
 
 export const teamMembers = pgTable("team_members", {
@@ -31,15 +33,22 @@ export const teamMembers = pgTable("team_members", {
   googleScholarUrl: text("google_scholar_url"),
   researchGateUrl: text("research_gate_url"),
   researchInterests: text("research_interests").array(),
+  linkedinUrl: text("linkedin_url"),
+  additionalInfo: text("additional_info")
 });
 
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  degree: text("degree").notNull(),
+  bio: text("degree").notNull(),
   projects: json("projects").$type<{title: string, description: string}[]>(),
   researchInterests: text("research_interests").array(),
   image: text("image"),
+  category: text("category"),
+  additionalInfo: text("additional_info"),
+  googleScholarUrl: text("google_scholar_url"),
+  researchGateUrl: text("research_gate_url"),
+  linkedinUrl: text("linkedin_url")
 });
 
 export const insertProjectSchema = createInsertSchema(projects);

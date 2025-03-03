@@ -45,7 +45,8 @@ export default function Home() {
     <div>
       {/* Hero Section */}
       <motion.section 
-        className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-background to-secondary/20"
+        // className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-background to-secondary/20"
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#EEDAD2] to-secondary/20"
         variants={fadeIn}
         initial="initial"
         animate="animate"
@@ -75,7 +76,13 @@ export default function Home() {
             transition={{ delay: 0.6 }}
           >
             <Link href="/research">
-              <Button size="lg" className="text-lg">
+              {/* <Button size="lg" className="text-lg">
+                Explore Our Research
+              </Button> */}
+              <Button 
+                size="lg" 
+                className="text-lg bg-[#F59C7D] hover:bg-[#F59C7D]/90"
+              >
                 Explore Our Research
               </Button>
             </Link>
@@ -91,7 +98,7 @@ export default function Home() {
         whileInView="animate"
         viewport={{ once: true }}
       >
-        <div className="container px-4">
+        <div className="container px-4 mx-auto">
           <motion.h2 
             className="text-3xl font-bold text-center mb-16"
             variants={fadeIn}
@@ -101,12 +108,16 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {researchAreas.map((area, index) => (
               <motion.div
+                // key={area.title}
+                // variants={fadeIn}
+                // whileHover={{ y: -10 }}
+                // className="group"
                 key={area.title}
                 variants={fadeIn}
                 whileHover={{ y: -10 }}
-                className="group"
+                className="group bg-[#EEDAD2]/10 hover:bg-[#EEDAD2]/20 transition-colors duration-300 rounded-lg"
               >
-                <Link href={`/research?category=${area.category}`}>
+                <Link href={`/research/${area.category}`}>
                   <div className="relative overflow-hidden rounded-lg cursor-pointer">
                     <div 
                       className="h-48 bg-cover bg-center transform transition-transform duration-700 group-hover:scale-110"
@@ -136,7 +147,7 @@ export default function Home() {
         whileInView="animate"
         viewport={{ once: true }}
       >
-        <div className="container px-4">
+        <div className="container px-4 mx-auto">
           <motion.h2 
             className="text-3xl font-bold text-center mb-16"
             variants={fadeIn}
@@ -149,7 +160,7 @@ export default function Home() {
                 key={publication.id}
                 variants={fadeIn}
                 whileHover={{ y: -5 }}
-                className="bg-background p-6 rounded-lg shadow-lg"
+                className="bg-[#F59C7D]/20 p-6 rounded-lg shadow-lg"
               >
                 <h3 className="text-xl font-semibold mb-2">{publication.title}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
@@ -171,7 +182,10 @@ export default function Home() {
             className="text-center mt-12"
           >
             <Link href="/publications">
-              <Button variant="outline" size="lg">View All Publications</Button>
+              <Button variant="outline" size="lg" 
+              className="bg-[#F59C7D] hover:bg-[#F59C7D]/90">
+                View All Publications
+              </Button>
             </Link>
           </motion.div>
         </div>
@@ -185,7 +199,7 @@ export default function Home() {
         whileInView="animate"
         viewport={{ once: true }}
       >
-        <div className="container px-4">
+        <div className="container px-4 mx-auto">
           <motion.h2 
             className="text-3xl font-bold text-center mb-16"
             variants={fadeIn}
@@ -195,10 +209,14 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {team.slice(0, 3).map(member => (
               <motion.div
+                // key={member.id}
+                // variants={fadeIn}
+                // whileHover={{ y: -5 }}
+                // className="text-center"
                 key={member.id}
                 variants={fadeIn}
                 whileHover={{ y: -5 }}
-                className="text-center"
+                className="text-center bg-[#F59C7D]/20 p-6 rounded-lg shadow-lg duration-300"
               >
                 <div className="w-32 h-32 mx-auto mb-4 relative overflow-hidden rounded-full">
                   {member.image ? (
@@ -223,7 +241,7 @@ export default function Home() {
             className="text-center mt-12"
           >
             <Link href="/team">
-              <Button variant="outline" size="lg">Meet Our Team</Button>
+              <Button variant="outline" size="lg" className="bg-[#F59C7D] hover:bg-[#F59C7D]/90">Meet Our Team</Button>
             </Link>
           </motion.div>
         </div>
@@ -231,13 +249,13 @@ export default function Home() {
 
       {/* Lab Image Section */}
       <motion.section 
-        className="py-24 bg-secondary/10"
+        className="py-24 bg-gradient-to-br from-[#EEDAD2] to-secondary/10"
         variants={fadeIn}
         initial="initial"
         whileInView="animate"
         viewport={{ once: true }}
       >
-        <div className="container px-4">
+        <div className="container px-4 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div 
               className="rounded-lg overflow-hidden"
@@ -263,7 +281,7 @@ export default function Home() {
                 groundbreaking research in computer vision, deep learning, and biometric systems.
               </motion.p>
               <Link href="/contact">
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" className="bg-[#F59C7D] hover:bg-[#F59C7D]/90">
                   Visit Our Lab
                 </Button>
               </Link>
