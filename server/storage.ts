@@ -32,9 +32,9 @@ export class MemStorage implements IStorage {
   private projects: Project[] = [
     {
       id: 1,
-      title: "Advanced Facial Recognition System",
-      abstract: "Development of a novel facial recognition system using deep learning.",
-      authors: ["Dr. Jane Smith", "John Doe"],
+      title: "Exploring periocular biometrics for cattle identification in the visible spectrum",
+      abstract: "The research focuses on developing a robust and efficient cattle identification system using periocular biometrics, designed for real-world deployment in farms and livestock management. The system aims to provide a tamper-proof alternative to traditional identification methods by leveraging deep learning models for periocular segmentation and feature extraction. It must be capable of handling challenges such as variations in lighting, occlusions, and diverse cattle breeds, ensuring high accuracy and reliability. ",
+      authors: ["Ananya M"],
       datasetLink: "https://dataset.vibeslab.org/face-recognition",
       githubLink: "https://github.com/vibeslab/face-recognition",
       date: "2024-01-23",
@@ -42,24 +42,124 @@ export class MemStorage implements IStorage {
     },
     {
       id: 2,
-      title: "Edge Computing for Real-time Video Analysis",
-      abstract: "Implementing efficient video processing algorithms on edge devices.",
-      authors: ["Dr. Mike Johnson", "Sarah Williams"],
-      datasetLink: "https://dataset.vibeslab.org/edge-video",
-      githubLink: "https://github.com/vibeslab/edge-video",
-      date: "2024-04-13",
-      category: "edge_computing"
+      title: "Monocular 3D Pedestrian Detection Using Transformers.",
+      abstract: "The goal of 3D pedestrian detection is to accurately determine the position, orientation, and motion of pedestrians in real time, enabling systems to predict their behavior and take proactive measures to prevent accidents. Using the transformers in this task, can improve the pedestrian localization and depth estimation as transformers are capable of capturing the long range dependencies.",
+      authors: ["V Vaagdhevi"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "visual_surveillance"
     },
     {
       id: 3,
-      title: "Advanced Facial Recognition System",
-      abstract: "Development of a novel facial recognition system using deep learning.",
-      authors: ["Dr. Jane Smith", "John Doe"],
-      datasetLink: "https://dataset.vibeslab.org/face-recognition",
-      githubLink: "https://github.com/vibeslab/face-recognition",
-      date: "2023-06-17",
+      title: "Enhancing Biometric Accuracy by Preventing False Positives with High-Resolution Images",
+      abstract: "This project focuses on enhancing biometric system accuracy by improving real biometric images using ESRGAN (Enhanced Super-Resolution Generative Adversarial Network) and VDSR (Very DeepSuper-Resolution). Additionally, GFP-GAN (Generative Facial Prior GAN) is used to generatehigh-resolution fake images, assessing system vulnerabilities to spoofing attacks. By trainingsuper-resolution models on downscaled high-quality images, we refine biometric inputs and analyze how biometric systems without liveness detection respond to AI-generated forgeries. The study evaluates false acceptance and rejection rates, offering insights into improving biometric authentication security and robustness.",
+      authors: ["A Manasa Reddy"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
       category: "biometrics"
-    }
+    },
+    {
+      id: 4,
+      title: "Enhancing Vehicle Safety on Non-Favourable Roads: An AI-Driven Driver Assistance System with Dash Cameras",
+      abstract: "This project integrates Advanced Driver Assistance Systems (ADAS) with dash cameras to improve vehicle safety on challenging roads. It employs AI techniques such as panoptic segmentation and SOLOv2 for pedestrian detection and segmentation. The Optimal Trajectory Generation Algorithm (OTGA) is used for real-time pedestrian movement prediction, enabling proactive hazard analysis and safety measures.",
+      authors: ["Haindavi Pichikala"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "visual_surveillance"
+    },
+    {
+      id: 5,
+      title: "Robust Light weight Pedestrian Detection algorithm for AMCR",
+      abstract: "The research focuses on developing a robust lightweight pedestrian detection algorithm for real-time pedestrian detection, suitable for edge devices, especially for AMCR (Autonomous Mobile Camera Robot). The algorithm should be able to detect pedestrians in challenging real time conditions such as occlusion, multi-scale pedestrian, pedestrians at different view angles (including bird’s eye view), rainy and fogy condition, day and night conditions.",
+      authors: ["Sukesh Babu V S"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "edge_computing"
+    },
+    {
+      id: 6,
+      title: "Pose Invariant Face Recognition Model",
+      abstract: "The research focuses on developing a pose-invariant human face recognition system by bridging the gap between 2D and 3D face recognition techniques. Traditional 2D face recognition systems struggle with A-PIE (Aging, Pose, Illumination, and Expression) challenges, while 3D face recognition requires complex data acquisition. To address these limitations, we perform 3D reconstruction from 2D images, enabling a hybrid approach that combines discriminative 2D features with structural 3D features. By integrating these multi-dimensional features for similarity checks, we achieve improved pose-invariant recognition. Encouraged by these results, we aim to extend this approach to cattle biometric identification.",
+      authors: ["Anu Jexline Joseph"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: ""
+    },
+    {
+      id: 7,
+      title: "Walking Direction Estimation, Adversarial Learning, Multi-Task Learning, Self Supervised Learning ",
+      abstract: "",
+      authors: ["Vishnuram AV "],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "biometrics"
+    },
+    {
+      id: 8,
+      title: "Robust Pedestrian Detection in Challenging Environments Using YOLO",
+      abstract: "Project focuses on Pedestrian Detection in a Robust Environment using YOLO, specifically in foggy and rainy conditions. You are using a custom dataset collected in a foggy environment and also exploring datasets for rainy conditions to enhance the model's robustness. The project involves fine-tuning YOLOv12 and YOLOv9 to improve pedestrian detection under adverse weather conditions. Your approach includes dataset augmentation, model optimization, and performance evaluation. Future work includes extending the model to handle extreme weather scenarios, integrating real-time detection capabilities, and exploring transformer-based architectures like DETR for enhanced object detection in challenging environments.",
+      authors: ["Pawan Kumar Bamne"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "edge_computing"
+    },
+    {
+      id: 9,
+      title: "Robust Gait Recognition: Addressing Uncertainty Using Statistical Inference and Learning Methodologies",
+      abstract: "",
+      authors: ["Hilton Raj"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "biometrics"
+    },
+    {
+      id: 10,
+      title: "Multimodal Cattle Biometrics",
+      abstract: "My research focuses on multimodal cattle biometrics. I have been working on data collection and multi-modal cattle identification using images of the face, muzzle, iris, full body, and ear. I am developing deep learning models for both individual biometric training and multi-modal biometric systems. In multi-modal biometrics, I am exploring score-level and feature fusion techniques. Additionally, I have created a dataset containing images of 30 cattle face subjects with 864 images.",
+      authors: ["Ramkumar T"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "biometrics"
+    },
+    {
+      id: 11,
+      title: "Hybrid Deep Learning Models for Detecting Fake Faces",
+      abstract: "This research focuses on building a powerful deep learning model to detect deepfake facial images created by advanced generative models like GANs and diffusion models. By exploring cutting-edge machine learning techniques, we aim to improve the accuracy and reliability of deepfake detection, helping to counter the growing challenge of AI-generated fake images.",
+      authors: ["Yaswanth Nalajala"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "generative_models"
+    },
+    {
+      id: 12,
+      title: "Gen AI for 3D Pedestrian Detection ",
+      abstract: "This project focuses on improving 3D pedestrian detection in autonomous systems using Generative AI techniques. By leveraging datasets like JRDB, we enhance object detection models to improve accuracy and reliability in identifying pedestrians in complex environments.",
+      authors: ["Aneesh Deepak RM"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "edge_computing"
+    },
+    {
+      id: 13,
+      title: "AI-Powered Cattle Recognition and Assistance",
+      abstract: "The AI-Powered Cattle Recognition and Assistance system leverages advanced computer vision and artificial intelligence to identify individual cows through their unique muzzle patterns, providing a more secure and permanent identification method than traditional tagging. This biometric approach ensures accurate record-keeping and traceability while reducing identification errors. Future enhancements will include disease detection using machine learning, an AI-powered chatbot for instant veterinary assistance, and a comprehensive medical and vaccination management system. By integrating these features, the system improves livestock health, enables early disease detection, and enhances farm productivity, making it a valuable tool for both small and large-scale cattle management.",
+      authors: ["Sai Dheeraj"],
+      datasetLink: "",
+      githubLink: "",
+      date: "",
+      category: "generative_models"
+    },   
   ];
 
   private publications: Publication[] = [
