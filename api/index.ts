@@ -1,42 +1,60 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import express from 'express';
-import { registerRoutes } from '../server/routes';
 import { MemStorage } from '../server/storage';
 
-// Create a new storage instance for each request
-// This ensures the storage is properly initialized in the serverless environment
+// Create a new storage instance
 const storage = new MemStorage();
 
-// Create Express app
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// Add logging middleware
-app.use((req, res, next) => {
-  console.log(`API Request: ${req.method} ${req.url}`);
-  next();
-});
-
-// Register routes with the storage instance
-registerRoutes(app, storage);
-
 // Create handler for Vercel
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`Vercel handler called: ${req.method} ${req.url}`);
   
-  // Convert Vercel request to Express request
-  const expressReq = req as any;
-  const expressRes = res as any;
-  
-  // Forward the request to Express app
-  return new Promise((resolve, reject) => {
-    app(expressReq, expressRes, (err: any) => {
-      if (err) {
-        console.error('Error in API handler:', err);
-        return reject(err);
+  try {
+    // Extract the path from the URL
+    const path = req.url || '';
+    
+    // Handle different API routes
+    if (path.startsWith('/api/projects')) {
+      // Check if it's a category request
+      const categoryMatch = path.match(/\/api\/projects\/([^\/]+)/);
+      if (categoryMatch) {
+        const category = categoryMatch[1];
+        console.log(`Fetching projects for category: ${category}`);
+        const projects = await storage.getProjectsByCategory(category);
+        console.log(`Found ${projects.length} projects for category ${category}`);
+        return res.status(200).json(projects);
+      } else {
+        // Return all projects
+        console.log('Fetching all projects');
+        const projects = await storage.getProjects();
+        console.log(`Found ${projects.length} projects`);
+        return res.status(200).json(projects);
       }
-      return resolve(undefined);
-    });
-  });
+    } 
+    else if (path === '/api/publications') {
+      console.log('Fetching all publications');
+      const publications = await storage.getPublications();
+      console.log(`Found ${publications.length} publications`);
+      return res.status(200).json(publications);
+    }
+    else if (path === '/api/team') {
+      console.log('Fetching all team members');
+      const team = await storage.getTeamMembers();
+      console.log(`Found ${team.length} team members`);
+      return res.status(200).json(team);
+    }
+    else if (path === '/api/students') {
+      console.log('Fetching all students');
+      const students = await storage.getStudents();
+      console.log(`Found ${students.length} students`);
+      return res.status(200).json(students);
+    }
+    else {
+      // Handle unknown routes
+      console.log(`Unknown route: ${path}`);
+      return res.status(404).json({ error: 'Not found' });
+    }
+  } catch (error) {
+    console.error('Error in API handler:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 } 
