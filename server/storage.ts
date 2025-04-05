@@ -307,6 +307,21 @@ export class MemStorage implements IStorage {
   private students: Student[] = [
     {
       id: 1,
+      name: "Ananya M",
+      bio: "Ph.D. Scholar",
+      projects: [
+        { title: "Exploring periocular biometrics for cattle identification", description: "Developing a robust and efficient cattle identification system using periocular biometrics." }
+      ],
+      researchInterests: ["Computer Vision", "Deep Learning", "Biometrics"],
+      image: "/ananya.jpg",
+      category: "biometrics",
+      additionalInfo: "Ph.D. Scholar at IIITDM Kancheepuram",
+      googleScholarUrl: "https://scholar.google.com",
+      researchGateUrl: "https://researchgate.net",
+      linkedinUrl: "https://linkedin.com"
+    },
+    {
+      id: 2,
       name: "Jane Smith",
       bio: "PhD Student",
       projects: [
@@ -324,7 +339,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 2,
+      id: 3,
       name: "Pavan Kumar",
       bio: "Masters Student",
       projects: [
@@ -342,7 +357,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 3,
+      id: 4,
       name: "P Sri Hanidevi",
       bio: "Masters Student",
       projects: [
@@ -360,7 +375,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 4,
+      id: 5,
       name: "A Manasa Reddy",
       bio: "Masters Student",
       projects: [
@@ -378,7 +393,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 5,
+      id: 6,
       name: "V Vaagdevi",
       bio: "Masters Student",
       projects: [
@@ -396,7 +411,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 6,
+      id: 7,
       name: "Hilton Paul",
       bio: "Bachelors Student",
       projects: [
@@ -414,7 +429,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 7,
+      id: 8,
       name: "Vishnuram A V",
       bio: "Bachelors Student",
       projects: [
@@ -432,7 +447,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 8,
+      id: 9,
       name: "Basab Ghosh",
       bio: "Bachelors Student",
       projects: [
@@ -450,7 +465,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 9,
+      id: 10,
       name: "Girik Khullar",
       bio: "Bachelors Student",
       projects: [
@@ -468,7 +483,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: "https://www.linkedin.com/in/girik-khullar/"
     },
     {
-      id: 10,
+      id: 11,
       name: "Ananya M",
       bio: "Bachelors Student",
       projects: [
@@ -486,7 +501,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 11,
+      id: 12,
       name: "Sahith",
       bio: "Currently Software Engineer (R&D) @TVS Motor Company",
       projects: [
@@ -504,7 +519,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 12,
+      id: 13,
       name: "Apurba",
       bio: "Currently Software Engineer @Trimble",
       projects: [
@@ -522,7 +537,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 13,
+      id: 14,
       name: "Ram Kumar R",
       bio: "Currently pursuing M.Tech @IIT Madras",
       projects: [
@@ -541,8 +556,9 @@ export class MemStorage implements IStorage {
     }
   ];
 
+  // Projects
   async getProjects(): Promise<Project[]> {
-    return this.projects;
+    return [...this.projects];
   }
 
   async getProjectsByCategory(category: string): Promise<Project[]> {
@@ -552,50 +568,53 @@ export class MemStorage implements IStorage {
   async addProject(project: InsertProject): Promise<Project> {
     const newProject: Project = {
       id: this.projects.length + 1,
-      datasetLink: null,
-      githubLink: null,
+      datasetLink: project.datasetLink || null,
+      githubLink: project.githubLink || null,
       ...project
     };
     this.projects.push(newProject);
     return newProject;
   }
 
+  // Publications
   async getPublications(): Promise<Publication[]> {
-    return this.publications;
+    return [...this.publications];
   }
 
   async addPublication(publication: InsertPublication): Promise<Publication> {
     const newPublication: Publication = {
       id: this.publications.length + 1,
-      link: null,
-      abstract: null,
+      link: publication.link || null,
+      abstract: publication.abstract || null,
       ...publication
     };
     this.publications.push(newPublication);
     return newPublication;
   }
 
+  // Team
   async getTeamMembers(): Promise<TeamMember[]> {
-    return this.teamMembers;
+    return [...this.teamMembers];
   }
 
   async addTeamMember(member: InsertTeamMember): Promise<TeamMember> {
     const newMember: TeamMember = {
       id: this.teamMembers.length + 1,
-      image: null,
-      googleScholarUrl: null,
-      researchGateUrl: null,
-      researchInterests: null,
-      linkedinUrl: null,
-      additionalInfo: null,
+      image: member.image || null,
+      googleScholarUrl: member.googleScholarUrl || null,
+      researchGateUrl: member.researchGateUrl || null,
+      researchInterests: member.researchInterests || null,
+      linkedinUrl: member.linkedinUrl || null,
+      additionalInfo: member.additionalInfo || null,
       ...member
     };
     this.teamMembers.push(newMember);
     return newMember;
   }
 
+  // Students
   async getStudents(): Promise<Student[]> {
-    return this.students;
+    return [...this.students];
   }
 
   async addStudent(student: InsertStudent): Promise<Student> {
@@ -603,7 +622,7 @@ export class MemStorage implements IStorage {
       id: this.students.length + 1,
       name: student.name,
       bio: student.bio,
-      projects: (student.projects as { title: string; description: string; }[]) || [],
+      projects: Array.isArray(student.projects) ? student.projects : [],
       researchInterests: student.researchInterests || null,
       image: student.image || null,
       category: student.category || null,

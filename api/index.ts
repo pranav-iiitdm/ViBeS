@@ -1,4 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { MemStorage } from '../server/storage';
+
+// Create a new storage instance
+const storage = new MemStorage();
 
 // Create handler for Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -26,125 +30,66 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const path = req.url || '';
     console.log(`Processing request for path: ${path}`);
     
-    // Handle different API routes with hardcoded data
+    // Handle different API routes
     if (path.startsWith('/api/projects')) {
-      // Return hardcoded projects data
-      const projects = [
-        {
-          id: 1,
-          title: "Test Project 1",
-          abstract: "This is a test project",
-          authors: ["Test Author"],
-          datasetLink: "https://example.com",
-          githubLink: "https://github.com",
-          date: "2024-01-01",
-          category: "test"
-        },
-        {
-          id: 2,
-          title: "Test Project 2",
-          abstract: "This is another test project",
-          authors: ["Test Author 2"],
-          datasetLink: "https://example.com",
-          githubLink: "https://github.com",
-          date: "2024-01-02",
-          category: "test"
+      // Check if it's a category request
+      const categoryMatch = path.match(/\/api\/projects\/([^\/]+)/);
+      if (categoryMatch) {
+        const category = categoryMatch[1];
+        console.log(`Fetching projects for category: ${category}`);
+        try {
+          const projects = await storage.getProjectsByCategory(category);
+          console.log(`Found ${projects.length} projects for category ${category}`);
+          return res.status(200).json(projects);
+        } catch (error) {
+          console.error(`Error fetching projects for category ${category}:`, error);
+          return res.status(500).json({ error: `Failed to fetch projects for category ${category}` });
         }
-      ];
-      return res.status(200).json(projects);
+      } else {
+        // Return all projects
+        console.log('Fetching all projects');
+        try {
+          const projects = await storage.getProjects();
+          console.log(`Found ${projects.length} projects`);
+          return res.status(200).json(projects);
+        } catch (error) {
+          console.error('Error fetching all projects:', error);
+          return res.status(500).json({ error: 'Failed to fetch all projects' });
+        }
+      }
     } 
     else if (path === '/api/publications') {
-      // Return hardcoded publications data
-      const publications = [
-        {
-          id: 1,
-          title: "Test Publication 1",
-          authors: ["Test Author"],
-          year: 2024,
-          venue: "Test Venue",
-          link: "https://example.com",
-          abstract: "This is a test publication",
-          type: "journal"
-        },
-        {
-          id: 2,
-          title: "Test Publication 2",
-          authors: ["Test Author 2"],
-          year: 2024,
-          venue: "Test Venue 2",
-          link: "https://example.com",
-          abstract: "This is another test publication",
-          type: "conference"
-        }
-      ];
-      return res.status(200).json(publications);
+      console.log('Fetching all publications');
+      try {
+        const publications = await storage.getPublications();
+        console.log(`Found ${publications.length} publications`);
+        return res.status(200).json(publications);
+      } catch (error) {
+        console.error('Error fetching publications:', error);
+        return res.status(500).json({ error: 'Failed to fetch publications' });
+      }
     }
     else if (path === '/api/team') {
-      // Return hardcoded team members data
-      const teamMembers = [
-        {
-          id: 1,
-          name: "Test Team Member 1",
-          role: "Test Role",
-          bio: "This is a test team member",
-          image: "https://example.com/image.jpg",
-          googleScholarUrl: "https://scholar.google.com",
-          researchGateUrl: "https://researchgate.net",
-          linkedinUrl: "https://linkedin.com",
-          researchInterests: ["Test Interest 1", "Test Interest 2"],
-          additionalInfo: "This is additional info"
-        },
-        {
-          id: 2,
-          name: "Test Team Member 2",
-          role: "Test Role 2",
-          bio: "This is another test team member",
-          image: "https://example.com/image2.jpg",
-          googleScholarUrl: "https://scholar.google.com",
-          researchGateUrl: "https://researchgate.net",
-          linkedinUrl: "https://linkedin.com",
-          researchInterests: ["Test Interest 3", "Test Interest 4"],
-          additionalInfo: "This is more additional info"
-        }
-      ];
-      return res.status(200).json(teamMembers);
+      console.log('Fetching all team members');
+      try {
+        const team = await storage.getTeamMembers();
+        console.log(`Found ${team.length} team members`);
+        return res.status(200).json(team);
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        return res.status(500).json({ error: 'Failed to fetch team members' });
+      }
     }
     else if (path === '/api/students') {
-      // Return hardcoded students data
-      const students = [
-        {
-          id: 1,
-          name: "Test Student 1",
-          bio: "This is a test student",
-          projects: [
-            { title: "Test Project 1", description: "This is a test project" },
-            { title: "Test Project 2", description: "This is another test project" }
-          ],
-          researchInterests: ["Test Interest 1", "Test Interest 2"],
-          image: "https://example.com/image.jpg",
-          category: "test",
-          additionalInfo: "This is additional info",
-          googleScholarUrl: "https://scholar.google.com",
-          researchGateUrl: "https://researchgate.net",
-          linkedinUrl: "https://linkedin.com"
-        },
-        {
-          id: 2,
-          name: "Test Student 2",
-          bio: "This is another test student",
-          projects: [
-            { title: "Test Project 3", description: "This is a third test project" }
-          ],
-          researchInterests: ["Test Interest 3", "Test Interest 4"],
-          image: "https://example.com/image2.jpg",
-          category: "test",
-          additionalInfo: "This is more additional info",
-          googleScholarUrl: "https://scholar.google.com",
-          researchGateUrl: "https://researchgate.net",
-          linkedinUrl: "https://linkedin.com"
-        }
-      ];
-      return res.status(200).json(students);
+      console.log('Fetching all students');
+      try {
+        const students = await storage.getStudents();
+        console.log(`Found ${students.length} students`);
+        return res.status(200).json(students);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        return res.status(500).json({ error: 'Failed to fetch students' });
+      }
     }
     else {
       // Handle unknown routes
