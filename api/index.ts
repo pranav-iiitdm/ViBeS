@@ -1,11 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { MemStorage } from '../server/storage';
 
-// Create a new storage instance
-const storage = new MemStorage();
-
-// Helper function to set CORS headers
-function setCorsHeaders(res: VercelResponse) {
+// Create handler for Vercel
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -13,22 +10,10 @@ function setCorsHeaders(res: VercelResponse) {
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
-}
-
-// Helper function to handle OPTIONS requests
-function handleOptions(req: VercelRequest, res: VercelResponse) {
-  setCorsHeaders(res);
-  res.status(200).end();
-}
-
-// Create handler for Vercel
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Set CORS headers for all responses
-  setCorsHeaders(res);
   
   // Handle OPTIONS requests for CORS
   if (req.method === 'OPTIONS') {
-    return handleOptions(req, res);
+    return res.status(200).end();
   }
 
   // Only allow GET requests
@@ -41,112 +26,132 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const path = req.url || '';
     console.log(`Processing request for path: ${path}`);
     
-    // Handle different API routes
+    // Handle different API routes with hardcoded data
     if (path.startsWith('/api/projects')) {
-      // Check if it's a category request
-      const categoryMatch = path.match(/\/api\/projects\/([^\/]+)/);
-      if (categoryMatch) {
-        const category = categoryMatch[1];
-        console.log(`Fetching projects for category: ${category}`);
-        try {
-          const projects = await storage.getProjectsByCategory(category);
-          console.log(`Found ${projects.length} projects for category ${category}`);
-          return res.status(200).json(projects);
-        } catch (error) {
-          console.error(`Error fetching projects for category ${category}:`, error);
-          return res.status(500).json({ error: `Failed to fetch projects for category ${category}` });
+      // Return hardcoded projects data
+      const projects = [
+        {
+          id: 1,
+          title: "Test Project 1",
+          abstract: "This is a test project",
+          authors: ["Test Author"],
+          datasetLink: "https://example.com",
+          githubLink: "https://github.com",
+          date: "2024-01-01",
+          category: "test"
+        },
+        {
+          id: 2,
+          title: "Test Project 2",
+          abstract: "This is another test project",
+          authors: ["Test Author 2"],
+          datasetLink: "https://example.com",
+          githubLink: "https://github.com",
+          date: "2024-01-02",
+          category: "test"
         }
-      } else {
-        // Return all projects
-        console.log('Fetching all projects');
-        try {
-          const projects = await storage.getProjects();
-          console.log(`Found ${projects.length} projects`);
-          return res.status(200).json(projects);
-        } catch (error) {
-          console.error('Error fetching all projects:', error);
-          return res.status(500).json({ error: 'Failed to fetch all projects' });
-        }
-      }
+      ];
+      return res.status(200).json(projects);
     } 
     else if (path === '/api/publications') {
-      console.log('Fetching all publications');
-      try {
-        // Get a small subset of publications first to test
-        const allPublications = await storage.getPublications();
-        console.log(`Found ${allPublications.length} publications`);
-        
-        // Try to serialize a small subset to identify any serialization issues
-        const testData = allPublications.slice(0, 2);
-        console.log('Test data:', JSON.stringify(testData));
-        
-        // If we get here, serialization worked, so return all publications
-        return res.status(200).json(allPublications);
-      } catch (error) {
-        console.error('Error fetching publications:', error);
-        if (error instanceof Error) {
-          console.error('Error stack:', error.stack);
+      // Return hardcoded publications data
+      const publications = [
+        {
+          id: 1,
+          title: "Test Publication 1",
+          authors: ["Test Author"],
+          year: 2024,
+          venue: "Test Venue",
+          link: "https://example.com",
+          abstract: "This is a test publication",
+          type: "journal"
+        },
+        {
+          id: 2,
+          title: "Test Publication 2",
+          authors: ["Test Author 2"],
+          year: 2024,
+          venue: "Test Venue 2",
+          link: "https://example.com",
+          abstract: "This is another test publication",
+          type: "conference"
         }
-        return res.status(500).json({ 
-          error: 'Failed to fetch publications',
-          message: error instanceof Error ? error.message : String(error)
-        });
-      }
+      ];
+      return res.status(200).json(publications);
     }
     else if (path === '/api/team') {
-      console.log('Fetching all team members');
-      try {
-        // Get a small subset of team members first to test
-        const allTeamMembers = await storage.getTeamMembers();
-        console.log(`Found ${allTeamMembers.length} team members`);
-        
-        // Try to serialize a small subset to identify any serialization issues
-        const testData = allTeamMembers.slice(0, 2);
-        console.log('Test data:', JSON.stringify(testData));
-        
-        // If we get here, serialization worked, so return all team members
-        return res.status(200).json(allTeamMembers);
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-        if (error instanceof Error) {
-          console.error('Error stack:', error.stack);
+      // Return hardcoded team members data
+      const teamMembers = [
+        {
+          id: 1,
+          name: "Test Team Member 1",
+          role: "Test Role",
+          bio: "This is a test team member",
+          image: "https://example.com/image.jpg",
+          googleScholarUrl: "https://scholar.google.com",
+          researchGateUrl: "https://researchgate.net",
+          linkedinUrl: "https://linkedin.com",
+          researchInterests: ["Test Interest 1", "Test Interest 2"],
+          additionalInfo: "This is additional info"
+        },
+        {
+          id: 2,
+          name: "Test Team Member 2",
+          role: "Test Role 2",
+          bio: "This is another test team member",
+          image: "https://example.com/image2.jpg",
+          googleScholarUrl: "https://scholar.google.com",
+          researchGateUrl: "https://researchgate.net",
+          linkedinUrl: "https://linkedin.com",
+          researchInterests: ["Test Interest 3", "Test Interest 4"],
+          additionalInfo: "This is more additional info"
         }
-        return res.status(500).json({ 
-          error: 'Failed to fetch team members',
-          message: error instanceof Error ? error.message : String(error)
-        });
-      }
+      ];
+      return res.status(200).json(teamMembers);
     }
     else if (path === '/api/students') {
-      console.log('Fetching all students');
-      try {
-        const students = await storage.getStudents();
-        console.log(`Found ${students.length} students`);
-        return res.status(200).json(students);
-      } catch (error) {
-        console.error('Error fetching students:', error);
-        if (error instanceof Error) {
-          console.error('Error stack:', error.stack);
+      // Return hardcoded students data
+      const students = [
+        {
+          id: 1,
+          name: "Test Student 1",
+          bio: "This is a test student",
+          projects: [
+            { title: "Test Project 1", description: "This is a test project" },
+            { title: "Test Project 2", description: "This is another test project" }
+          ],
+          researchInterests: ["Test Interest 1", "Test Interest 2"],
+          image: "https://example.com/image.jpg",
+          category: "test",
+          additionalInfo: "This is additional info",
+          googleScholarUrl: "https://scholar.google.com",
+          researchGateUrl: "https://researchgate.net",
+          linkedinUrl: "https://linkedin.com"
+        },
+        {
+          id: 2,
+          name: "Test Student 2",
+          bio: "This is another test student",
+          projects: [
+            { title: "Test Project 3", description: "This is a third test project" }
+          ],
+          researchInterests: ["Test Interest 3", "Test Interest 4"],
+          image: "https://example.com/image2.jpg",
+          category: "test",
+          additionalInfo: "This is more additional info",
+          googleScholarUrl: "https://scholar.google.com",
+          researchGateUrl: "https://researchgate.net",
+          linkedinUrl: "https://linkedin.com"
         }
-        return res.status(500).json({ 
-          error: 'Failed to fetch students',
-          message: error instanceof Error ? error.message : String(error)
-        });
-      }
+      ];
+      return res.status(200).json(students);
     }
     else {
       // Handle unknown routes
-      console.log(`Unknown route: ${path}`);
       return res.status(404).json({ error: 'Not found' });
     }
   } catch (error) {
     console.error('Error in API handler:', error);
-    if (error instanceof Error) {
-      console.error('Error stack:', error.stack);
-    }
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : String(error)
-    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 } 
