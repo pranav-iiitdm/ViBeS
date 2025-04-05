@@ -7,10 +7,13 @@ const storage = new MemStorage();
 // Create handler for Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`Vercel handler called: ${req.method} ${req.url}`);
+  console.log('Request headers:', req.headers);
+  console.log('Request query:', req.query);
   
   try {
     // Extract the path from the URL
     const path = req.url || '';
+    console.log('Processing path:', path);
     
     // Handle different API routes
     if (path.startsWith('/api/projects')) {
@@ -35,10 +38,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const publications = await storage.getPublications();
         console.log(`Found ${publications.length} publications`);
+        console.log('Publications data:', JSON.stringify(publications, null, 2));
         return res.status(200).json(publications);
       } catch (error) {
         console.error('Error fetching publications:', error);
-        return res.status(500).json({ error: 'Failed to fetch publications' });
+        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+        return res.status(500).json({ error: 'Failed to fetch publications', details: error instanceof Error ? error.message : String(error) });
       }
     }
     else if (path === '/api/team') {
@@ -70,6 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   } catch (error) {
     console.error('Error in API handler:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    return res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) });
   }
 } 
