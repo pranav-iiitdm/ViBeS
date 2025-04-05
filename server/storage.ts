@@ -622,7 +622,7 @@ export class MemStorage implements IStorage {
       id: this.students.length + 1,
       name: student.name,
       bio: student.bio,
-      projects: Array.isArray(student.projects) ? student.projects : [],
+      projects: student.projects as {title: string, description: string}[] || [],
       researchInterests: student.researchInterests || null,
       image: student.image || null,
       category: student.category || null,
