@@ -21,19 +21,11 @@ function handleOptions(req: VercelRequest, res: VercelResponse) {
   res.status(200).end();
 }
 
-// Helper function to safely serialize data
-function safeJsonResponse(res: VercelResponse, status: number, data: any) {
-  setCorsHeaders(res);
-  try {
-    return res.status(status).json(data);
-  } catch (error) {
-    console.error('Error serializing response:', error);
-    return res.status(500).json({ error: 'Error serializing response' });
-  }
-}
-
 // Create handler for Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Set CORS headers for all responses
+  setCorsHeaders(res);
+  
   // Handle OPTIONS requests for CORS
   if (req.method === 'OPTIONS') {
     return handleOptions(req, res);
@@ -41,12 +33,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Only allow GET requests
   if (req.method !== 'GET') {
-    return safeJsonResponse(res, 405, { error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Extract the path from the URL
     const path = req.url || '';
+    console.log(`Processing request for path: ${path}`);
     
     // Handle different API routes
     if (path.startsWith('/api/projects')) {
@@ -54,47 +47,106 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const categoryMatch = path.match(/\/api\/projects\/([^\/]+)/);
       if (categoryMatch) {
         const category = categoryMatch[1];
-        const projects = await storage.getProjectsByCategory(category);
-        return safeJsonResponse(res, 200, projects);
+        console.log(`Fetching projects for category: ${category}`);
+        try {
+          const projects = await storage.getProjectsByCategory(category);
+          console.log(`Found ${projects.length} projects for category ${category}`);
+          return res.status(200).json(projects);
+        } catch (error) {
+          console.error(`Error fetching projects for category ${category}:`, error);
+          return res.status(500).json({ error: `Failed to fetch projects for category ${category}` });
+        }
       } else {
         // Return all projects
-        const projects = await storage.getProjects();
-        return safeJsonResponse(res, 200, projects);
+        console.log('Fetching all projects');
+        try {
+          const projects = await storage.getProjects();
+          console.log(`Found ${projects.length} projects`);
+          return res.status(200).json(projects);
+        } catch (error) {
+          console.error('Error fetching all projects:', error);
+          return res.status(500).json({ error: 'Failed to fetch all projects' });
+        }
       }
     } 
     else if (path === '/api/publications') {
+      console.log('Fetching all publications');
       try {
-        const publications = await storage.getPublications();
-        return safeJsonResponse(res, 200, publications);
+        // Get a small subset of publications first to test
+        const allPublications = await storage.getPublications();
+        console.log(`Found ${allPublications.length} publications`);
+        
+        // Try to serialize a small subset to identify any serialization issues
+        const testData = allPublications.slice(0, 2);
+        console.log('Test data:', JSON.stringify(testData));
+        
+        // If we get here, serialization worked, so return all publications
+        return res.status(200).json(allPublications);
       } catch (error) {
         console.error('Error fetching publications:', error);
-        return safeJsonResponse(res, 500, { error: 'Failed to fetch publications' });
+        if (error instanceof Error) {
+          console.error('Error stack:', error.stack);
+        }
+        return res.status(500).json({ 
+          error: 'Failed to fetch publications',
+          message: error instanceof Error ? error.message : String(error)
+        });
       }
     }
     else if (path === '/api/team') {
+      console.log('Fetching all team members');
       try {
-        const team = await storage.getTeamMembers();
-        return safeJsonResponse(res, 200, team);
+        // Get a small subset of team members first to test
+        const allTeamMembers = await storage.getTeamMembers();
+        console.log(`Found ${allTeamMembers.length} team members`);
+        
+        // Try to serialize a small subset to identify any serialization issues
+        const testData = allTeamMembers.slice(0, 2);
+        console.log('Test data:', JSON.stringify(testData));
+        
+        // If we get here, serialization worked, so return all team members
+        return res.status(200).json(allTeamMembers);
       } catch (error) {
         console.error('Error fetching team members:', error);
-        return safeJsonResponse(res, 500, { error: 'Failed to fetch team members' });
+        if (error instanceof Error) {
+          console.error('Error stack:', error.stack);
+        }
+        return res.status(500).json({ 
+          error: 'Failed to fetch team members',
+          message: error instanceof Error ? error.message : String(error)
+        });
       }
     }
     else if (path === '/api/students') {
+      console.log('Fetching all students');
       try {
         const students = await storage.getStudents();
-        return safeJsonResponse(res, 200, students);
+        console.log(`Found ${students.length} students`);
+        return res.status(200).json(students);
       } catch (error) {
         console.error('Error fetching students:', error);
-        return safeJsonResponse(res, 500, { error: 'Failed to fetch students' });
+        if (error instanceof Error) {
+          console.error('Error stack:', error.stack);
+        }
+        return res.status(500).json({ 
+          error: 'Failed to fetch students',
+          message: error instanceof Error ? error.message : String(error)
+        });
       }
     }
     else {
       // Handle unknown routes
-      return safeJsonResponse(res, 404, { error: 'Not found' });
+      console.log(`Unknown route: ${path}`);
+      return res.status(404).json({ error: 'Not found' });
     }
   } catch (error) {
     console.error('Error in API handler:', error);
-    return safeJsonResponse(res, 500, { error: 'Internal server error' });
+    if (error instanceof Error) {
+      console.error('Error stack:', error.stack);
+    }
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : String(error)
+    });
   }
 } 
