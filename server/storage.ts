@@ -73,7 +73,7 @@ export class MemStorage implements IStorage {
     {
       id: 5,
       title: "Robust Light weight Pedestrian Detection algorithm for AMCR",
-      abstract: "The research focuses on developing a robust lightweight pedestrian detection algorithm for real-time pedestrian detection, suitable for edge devices, especially for AMCR (Autonomous Mobile Camera Robot). The algorithm should be able to detect pedestrians in challenging real time conditions such as occlusion, multi-scale pedestrian, pedestrians at different view angles (including bird's eye view), rainy and fogy condition, day and night conditions.",
+      abstract: "The research focuses on developing a robust lightweight pedestrian detection algorithm for real-time pedestrian detection, suitable for edge devices, especially for AMCR (Autonomous Mobile Camera Robot). The algorithm should be able to detect pedestrians in challenging real time conditions such as occlusion, multi-scale pedestrian, pedestrians at different view angles (including bird’s eye view), rainy and fogy condition, day and night conditions.",
       authors: ["Sukesh Babu V S"],
       datasetLink: "",
       githubLink: "",
@@ -307,23 +307,8 @@ export class MemStorage implements IStorage {
   private students: Student[] = [
     {
       id: 1,
-      name: "Ananya M",
-      bio: "Ph.D. Scholar",
-      projects: [
-        { title: "Exploring periocular biometrics for cattle identification", description: "Developing a robust and efficient cattle identification system using periocular biometrics." }
-      ],
-      researchInterests: ["Computer Vision", "Deep Learning", "Biometrics"],
-      image: "/ananya.jpg",
-      category: "biometrics",
-      additionalInfo: "Ph.D. Scholar at IIITDM Kancheepuram",
-      googleScholarUrl: "https://scholar.google.com",
-      researchGateUrl: "https://researchgate.net",
-      linkedinUrl: "https://linkedin.com"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      bio: "PhD Student",
+      name: "Ram Kumar T",
+      bio: "M.Tech Student",
       projects: [
         {
           title: "Advanced Facial Recognition System",
@@ -339,7 +324,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 3,
+      id: 2,
       name: "Pavan Kumar",
       bio: "Masters Student",
       projects: [
@@ -357,7 +342,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 4,
+      id: 3,
       name: "P Sri Hanidevi",
       bio: "Masters Student",
       projects: [
@@ -375,7 +360,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 5,
+      id: 4,
       name: "A Manasa Reddy",
       bio: "Masters Student",
       projects: [
@@ -393,7 +378,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 6,
+      id: 5,
       name: "V Vaagdevi",
       bio: "Masters Student",
       projects: [
@@ -411,7 +396,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 7,
+      id: 6,
       name: "Hilton Paul",
       bio: "Bachelors Student",
       projects: [
@@ -429,7 +414,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 8,
+      id: 7,
       name: "Vishnuram A V",
       bio: "Bachelors Student",
       projects: [
@@ -447,7 +432,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 9,
+      id: 8,
       name: "Basab Ghosh",
       bio: "Bachelors Student",
       projects: [
@@ -465,7 +450,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 10,
+      id: 9,
       name: "Girik Khullar",
       bio: "Bachelors Student",
       projects: [
@@ -483,7 +468,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: "https://www.linkedin.com/in/girik-khullar/"
     },
     {
-      id: 11,
+      id: 10,
       name: "Ananya M",
       bio: "Bachelors Student",
       projects: [
@@ -501,7 +486,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 12,
+      id: 11,
       name: "Sahith",
       bio: "Currently Software Engineer (R&D) @TVS Motor Company",
       projects: [
@@ -519,7 +504,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 13,
+      id: 12,
       name: "Apurba",
       bio: "Currently Software Engineer @Trimble",
       projects: [
@@ -537,7 +522,7 @@ export class MemStorage implements IStorage {
       linkedinUrl: ""
     },
     {
-      id: 14,
+      id: 13,
       name: "Ram Kumar R",
       bio: "Currently pursuing M.Tech @IIT Madras",
       projects: [
@@ -622,7 +607,7 @@ export class MemStorage implements IStorage {
       id: this.students.length + 1,
       name: student.name,
       bio: student.bio,
-      projects: student.projects as {title: string, description: string}[] || [],
+      projects: Array.isArray(student.projects) ? student.projects as {title: string, description: string}[] : [],
       researchInterests: student.researchInterests || null,
       image: student.image || null,
       category: student.category || null,

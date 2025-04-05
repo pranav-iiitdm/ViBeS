@@ -1,8 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { MemStorage } from '../server/storage';
-
-// Create a new storage instance
-const storage = new MemStorage();
+import { storage } from '../server/storage';
 
 // Create handler for Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -32,64 +29,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Handle different API routes
     if (path.startsWith('/api/projects')) {
-      // Check if it's a category request
-      const categoryMatch = path.match(/\/api\/projects\/([^\/]+)/);
-      if (categoryMatch) {
-        const category = categoryMatch[1];
+      // Check if a category is specified
+      const url = new URL(path, 'http://localhost');
+      const category = url.searchParams.get('category');
+      
+      let projects;
+      if (category) {
         console.log(`Fetching projects for category: ${category}`);
-        try {
-          const projects = await storage.getProjectsByCategory(category);
-          console.log(`Found ${projects.length} projects for category ${category}`);
-          return res.status(200).json(projects);
-        } catch (error) {
-          console.error(`Error fetching projects for category ${category}:`, error);
-          return res.status(500).json({ error: `Failed to fetch projects for category ${category}` });
-        }
+        projects = await storage.getProjectsByCategory(category);
       } else {
-        // Return all projects
         console.log('Fetching all projects');
-        try {
-          const projects = await storage.getProjects();
-          console.log(`Found ${projects.length} projects`);
-          return res.status(200).json(projects);
-        } catch (error) {
-          console.error('Error fetching all projects:', error);
-          return res.status(500).json({ error: 'Failed to fetch all projects' });
-        }
+        projects = await storage.getProjects();
       }
+      
+      console.log(`Found ${projects.length} projects`);
+      return res.status(200).json(projects);
     } 
     else if (path === '/api/publications') {
-      console.log('Fetching all publications');
-      try {
-        const publications = await storage.getPublications();
-        console.log(`Found ${publications.length} publications`);
-        return res.status(200).json(publications);
-      } catch (error) {
-        console.error('Error fetching publications:', error);
-        return res.status(500).json({ error: 'Failed to fetch publications' });
-      }
+      console.log('Fetching publications');
+      const publications = await storage.getPublications();
+      console.log(`Found ${publications.length} publications`);
+      return res.status(200).json(publications);
     }
     else if (path === '/api/team') {
-      console.log('Fetching all team members');
-      try {
-        const team = await storage.getTeamMembers();
-        console.log(`Found ${team.length} team members`);
-        return res.status(200).json(team);
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-        return res.status(500).json({ error: 'Failed to fetch team members' });
-      }
+      console.log('Fetching team members');
+      const teamMembers = await storage.getTeamMembers();
+      console.log(`Found ${teamMembers.length} team members`);
+      return res.status(200).json(teamMembers);
     }
     else if (path === '/api/students') {
-      console.log('Fetching all students');
-      try {
-        const students = await storage.getStudents();
-        console.log(`Found ${students.length} students`);
-        return res.status(200).json(students);
-      } catch (error) {
-        console.error('Error fetching students:', error);
-        return res.status(500).json({ error: 'Failed to fetch students' });
-      }
+      console.log('Fetching students');
+      const students = await storage.getStudents();
+      console.log(`Found ${students.length} students`);
+      return res.status(200).json(students);
     }
     else {
       // Handle unknown routes
