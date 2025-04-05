@@ -4,11 +4,46 @@ import { MemStorage } from '../server/storage';
 // Create a new storage instance
 const storage = new MemStorage();
 
+// Helper function to set CORS headers
+function setCorsHeaders(res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+}
+
+// Helper function to handle OPTIONS requests
+function handleOptions(req: VercelRequest, res: VercelResponse) {
+  setCorsHeaders(res);
+  res.status(200).end();
+}
+
+// Helper function to safely serialize data
+function safeJsonResponse(res: VercelResponse, status: number, data: any) {
+  setCorsHeaders(res);
+  try {
+    return res.status(status).json(data);
+  } catch (error) {
+    console.error('Error serializing response:', error);
+    return res.status(500).json({ error: 'Error serializing response' });
+  }
+}
+
 // Create handler for Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Basic request logging
-  console.log(`Request: ${req.method} ${req.url}`);
-  
+  // Handle OPTIONS requests for CORS
+  if (req.method === 'OPTIONS') {
+    return handleOptions(req, res);
+  }
+
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    return safeJsonResponse(res, 405, { error: 'Method not allowed' });
+  }
+
   try {
     // Extract the path from the URL
     const path = req.url || '';
@@ -20,46 +55,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (categoryMatch) {
         const category = categoryMatch[1];
         const projects = await storage.getProjectsByCategory(category);
-        return res.status(200).json(projects);
+        return safeJsonResponse(res, 200, projects);
       } else {
         // Return all projects
         const projects = await storage.getProjects();
-        return res.status(200).json(projects);
+        return safeJsonResponse(res, 200, projects);
       }
     } 
     else if (path === '/api/publications') {
       try {
         const publications = await storage.getPublications();
-        return res.status(200).json(publications);
+        return safeJsonResponse(res, 200, publications);
       } catch (error) {
         console.error('Error fetching publications:', error);
-        return res.status(500).json({ error: 'Failed to fetch publications' });
+        return safeJsonResponse(res, 500, { error: 'Failed to fetch publications' });
       }
     }
     else if (path === '/api/team') {
       try {
         const team = await storage.getTeamMembers();
-        return res.status(200).json(team);
+        return safeJsonResponse(res, 200, team);
       } catch (error) {
         console.error('Error fetching team members:', error);
-        return res.status(500).json({ error: 'Failed to fetch team members' });
+        return safeJsonResponse(res, 500, { error: 'Failed to fetch team members' });
       }
     }
     else if (path === '/api/students') {
       try {
         const students = await storage.getStudents();
-        return res.status(200).json(students);
+        return safeJsonResponse(res, 200, students);
       } catch (error) {
         console.error('Error fetching students:', error);
-        return res.status(500).json({ error: 'Failed to fetch students' });
+        return safeJsonResponse(res, 500, { error: 'Failed to fetch students' });
       }
     }
     else {
       // Handle unknown routes
-      return res.status(404).json({ error: 'Not found' });
+      return safeJsonResponse(res, 404, { error: 'Not found' });
     }
   } catch (error) {
     console.error('Error in API handler:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return safeJsonResponse(res, 500, { error: 'Internal server error' });
   }
 } 
