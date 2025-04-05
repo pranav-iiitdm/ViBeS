@@ -73,7 +73,7 @@ export class MemStorage implements IStorage {
     {
       id: 5,
       title: "Robust Light weight Pedestrian Detection algorithm for AMCR",
-      abstract: "The research focuses on developing a robust lightweight pedestrian detection algorithm for real-time pedestrian detection, suitable for edge devices, especially for AMCR (Autonomous Mobile Camera Robot). The algorithm should be able to detect pedestrians in challenging real time conditions such as occlusion, multi-scale pedestrian, pedestrians at different view angles (including bird’s eye view), rainy and fogy condition, day and night conditions.",
+      abstract: "The research focuses on developing a robust lightweight pedestrian detection algorithm for real-time pedestrian detection, suitable for edge devices, especially for AMCR (Autonomous Mobile Camera Robot). The algorithm should be able to detect pedestrians in challenging real time conditions such as occlusion, multi-scale pedestrian, pedestrians at different view angles (including bird's eye view), rainy and fogy condition, day and night conditions.",
       authors: ["Sukesh Babu V S"],
       datasetLink: "",
       githubLink: "",
@@ -307,8 +307,8 @@ export class MemStorage implements IStorage {
   private students: Student[] = [
     {
       id: 1,
-      name: "Ram Kumar T",
-      bio: "M.Tech Student",
+      name: "Jane Smith",
+      bio: "PhD Student",
       projects: [
         {
           title: "Advanced Facial Recognition System",
@@ -546,13 +546,15 @@ export class MemStorage implements IStorage {
   }
 
   async getProjectsByCategory(category: string): Promise<Project[]> {
-    return this.projects.filter(p => p.category === category);
+    return this.projects.filter(project => project.category === category);
   }
 
   async addProject(project: InsertProject): Promise<Project> {
-    const newProject = {
-      ...project,
-      id: this.projects.length + 1
+    const newProject: Project = {
+      id: this.projects.length + 1,
+      datasetLink: null,
+      githubLink: null,
+      ...project
     };
     this.projects.push(newProject);
     return newProject;
@@ -563,9 +565,11 @@ export class MemStorage implements IStorage {
   }
 
   async addPublication(publication: InsertPublication): Promise<Publication> {
-    const newPublication = {
-      ...publication,
-      id: this.publications.length + 1
+    const newPublication: Publication = {
+      id: this.publications.length + 1,
+      link: null,
+      abstract: null,
+      ...publication
     };
     this.publications.push(newPublication);
     return newPublication;
@@ -576,9 +580,15 @@ export class MemStorage implements IStorage {
   }
 
   async addTeamMember(member: InsertTeamMember): Promise<TeamMember> {
-    const newMember = {
-      ...member,
-      id: this.teamMembers.length + 1
+    const newMember: TeamMember = {
+      id: this.teamMembers.length + 1,
+      image: null,
+      googleScholarUrl: null,
+      researchGateUrl: null,
+      researchInterests: null,
+      linkedinUrl: null,
+      additionalInfo: null,
+      ...member
     };
     this.teamMembers.push(newMember);
     return newMember;
@@ -589,9 +599,18 @@ export class MemStorage implements IStorage {
   }
 
   async addStudent(student: InsertStudent): Promise<Student> {
-    const newStudent = {
-      ...student,
-      id: this.students.length + 1
+    const newStudent: Student = {
+      id: this.students.length + 1,
+      name: student.name,
+      bio: student.bio,
+      projects: (student.projects as { title: string; description: string; }[]) || [],
+      researchInterests: student.researchInterests || null,
+      image: student.image || null,
+      category: student.category || null,
+      additionalInfo: student.additionalInfo || null,
+      googleScholarUrl: student.googleScholarUrl || null,
+      researchGateUrl: student.researchGateUrl || null,
+      linkedinUrl: student.linkedinUrl || null
     };
     this.students.push(newStudent);
     return newStudent;

@@ -32,21 +32,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } 
     else if (path === '/api/publications') {
       console.log('Fetching all publications');
-      const publications = await storage.getPublications();
-      console.log(`Found ${publications.length} publications`);
-      return res.status(200).json(publications);
+      try {
+        const publications = await storage.getPublications();
+        console.log(`Found ${publications.length} publications`);
+        return res.status(200).json(publications);
+      } catch (error) {
+        console.error('Error fetching publications:', error);
+        return res.status(500).json({ error: 'Failed to fetch publications' });
+      }
     }
     else if (path === '/api/team') {
       console.log('Fetching all team members');
-      const team = await storage.getTeamMembers();
-      console.log(`Found ${team.length} team members`);
-      return res.status(200).json(team);
+      try {
+        const team = await storage.getTeamMembers();
+        console.log(`Found ${team.length} team members`);
+        return res.status(200).json(team);
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        return res.status(500).json({ error: 'Failed to fetch team members' });
+      }
     }
     else if (path === '/api/students') {
       console.log('Fetching all students');
-      const students = await storage.getStudents();
-      console.log(`Found ${students.length} students`);
-      return res.status(200).json(students);
+      try {
+        const students = await storage.getStudents();
+        console.log(`Found ${students.length} students`);
+        return res.status(200).json(students);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        return res.status(500).json({ error: 'Failed to fetch students' });
+      }
     }
     else {
       // Handle unknown routes
