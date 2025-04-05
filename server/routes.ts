@@ -1,8 +1,11 @@
 import type { Express } from "express";
 import { createServer } from "http";
-import { storage } from "./storage";
+import { IStorage } from "./storage";
 
-export function registerRoutes(app: Express) {
+export function registerRoutes(app: Express, storageInstance?: IStorage) {
+  // Use the provided storage instance or the default one
+  const storage = storageInstance || require("./storage").storage;
+
   // Projects routes
   app.get("/api/projects", async (_req, res) => {
     const projects = await storage.getProjects();
