@@ -2,8 +2,9 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { registerRoutes } from './routes.js';
-import { StorageService } from './storage.js';
+import { SupabaseStorage } from './storage.js';
 import { chatbotService } from './chatbot.js';
+import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,9 +14,22 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(cors({
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:5174',
+    'https://vibes-pp4bjpx0b-vi-be-s.vercel.app',
+    'https://vibes-new.vercel.app',
+    'https://vibes-3vyr7mr85-vi-be-s.vercel.app',
+    'https://vibes-79bldi0fm-vi-be-s.vercel.app',
+    'https://vibes-pprfx22pi-vi-be-s.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Initialize storage
-const storage = new StorageService();
+const storage = new SupabaseStorage();
 console.log('Registering routes with storage instance:', storage ? 'provided' : 'undefined');
 
 // Serve static files in production

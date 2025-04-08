@@ -1,5 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from '../server/storage';
+import { SupabaseStorage } from '../server/storage';
+
+// Create a storage instance
+const storage = new SupabaseStorage();
 
 // Create handler for Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
