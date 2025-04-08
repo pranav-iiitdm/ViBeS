@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`Processing request for path: ${path}`);
     
     // Handle different API routes
-    if (path.startsWith('/api/projects')) {
+    if (path.startsWith('/projects')) {
       // Check if a category is specified
       const url = new URL(path, 'http://localhost');
       const category = url.searchParams.get('category');
@@ -48,19 +48,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log(`Found ${projects.length} projects`);
       return res.status(200).json(projects);
     } 
-    else if (path === '/api/publications') {
+    else if (path === '/publications') {
       console.log('Fetching publications');
       const publications = await storage.getPublications();
       console.log(`Found ${publications.length} publications`);
       return res.status(200).json(publications);
     }
-    else if (path === '/api/team') {
+    else if (path === '/team') {
       console.log('Fetching team members');
       const teamMembers = await storage.getTeamMembers();
       console.log(`Found ${teamMembers.length} team members`);
       return res.status(200).json(teamMembers);
     }
-    else if (path === '/api/students') {
+    else if (path === '/students') {
       console.log('Fetching students');
       const students = await storage.getStudents();
       console.log(`Found ${students.length} students`);
