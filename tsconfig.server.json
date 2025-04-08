@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist/server",
+    "noEmit": false,
+    "jsx": "react",
+    "target": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@/*": ["./client/src/*"]
+    },
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["server/**/*", "shared/**/*"],
+  "exclude": ["node_modules", "client"]
+} 

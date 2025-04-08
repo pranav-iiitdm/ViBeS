@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- Main gradient with rotation -->
+        <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#EEDAD2"/>
+            <stop offset="100%" style="stop-color:#F59C7D"/>
+            <animate attributeName="x2" values="100%;0%;100%" dur="8s" repeatCount="indefinite"/>
+            <animate attributeName="y2" values="100%;0%;100%" dur="8s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <!-- Animated scan line -->
+        <linearGradient id="scanGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#F59C7D;stop-opacity:0"/>
+            <stop offset="50%" style="stop-color:#F59C7D;stop-opacity:0.3"/>
+            <stop offset="100%" style="stop-color:#F59C7D;stop-opacity:0"/>
+            <animate attributeName="x1" values="-100%;100%" dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="x2" values="0%;200%" dur="3s" repeatCount="indefinite"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Animated background circles -->
+    <g id="background-circles" opacity="5">
+        <!-- Pulsing scanning circles -->
+        <circle cx="200" cy="100" r="80" fill="none" stroke="#db5f12" stroke-width="0.5">
+            <animate attributeName="r" values="80;85;80" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-opacity" values="0.15;0.3;0.15" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="200" cy="100" r="60" fill="none" stroke="#F59C7D" stroke-width="0.5">
+            <animate attributeName="r" values="60;65;60" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-opacity" values="0.15;0.3;0.15" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="200" cy="100" r="40" fill="none" stroke="#F59C7D" stroke-width="0.5">
+            <animate attributeName="r" values="40;45;40" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-opacity" values="0.15;0.3;0.15" dur="4s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Pulsing neural points -->
+        <g fill="#db5f12">
+            <circle cx="160" cy="60" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="0s"/>
+            </circle>
+            <circle cx="240" cy="60" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+            </circle>
+            <circle cx="150" cy="100" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+            </circle>
+            <circle cx="250" cy="100" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="0.9s"/>
+            </circle>
+            <circle cx="160" cy="140" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="1.2s"/>
+            </circle>
+            <circle cx="240" cy="140" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="1.5s"/>
+            </circle>
+            <circle cx="200" cy="50" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="1.8s"/>
+            </circle>
+            <circle cx="200" cy="150" r="2">
+                <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" begin="2.1s"/>
+            </circle>
+        </g>
+    </g>
+
+    <!-- Animated Neural Connections -->
+    <g id="neural-paths" stroke="#db5f12" stroke-width="2" opacity="0.7">
+        <!-- Flowing connection paths -->
+        <path d="M160,60 Q200,80 240,60" fill="none">
+            <animate attributeName="d" 
+                     values="M160,60 Q200,80 240,60;M160,65 Q200,85 240,65;M160,60 Q200,80 240,60" 
+                     dur="4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M150,100 Q200,120 250,100" fill="none">
+            <animate attributeName="d" 
+                     values="M150,100 Q200,120 250,100;M150,105 Q200,125 250,105;M150,100 Q200,120 250,100" 
+                     dur="4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M160,140 Q200,120 240,140" fill="none">
+            <animate attributeName="d" 
+                     values="M160,140 Q200,120 240,140;M160,135 Q200,115 240,135;M160,140 Q200,120 240,140" 
+                     dur="4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M200,50 Q160,100 200,150" fill="none">
+            <animate attributeName="d" 
+                     values="M200,50 Q160,100 200,150;M195,50 Q155,100 195,150;M200,50 Q160,100 200,150" 
+                     dur="4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M200,50 Q240,100 200,150" fill="none">
+            <animate attributeName="d" 
+                     values="M200,50 Q240,100 200,150;M205,50 Q245,100 205,150;M200,50 Q240,100 200,150" 
+                     dur="4s" repeatCount="indefinite"/>
+        </path>
+    </g>
+
+    <!-- Animated Eye -->
+    <g id="eye">
+        <!-- Animated base eye shape -->
+        <path d="M160,100 C180,70 220,70 240,100 C220,130 180,130 160,100" 
+              fill="white" stroke="#F59C7D" stroke-width="2">
+            <animate attributeName="d" 
+                     values="M160,100 C180,70 220,70 240,100 C220,130 180,130 160,100;
+                             M165,100 C180,75 220,75 235,100 C220,125 180,125 165,100;
+                             M160,100 C180,70 220,70 240,100 C220,130 180,130 160,100" 
+                     dur="4s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- Animated iris -->
+        <g transform="translate(200,100)">
+            <path d="M-20,0 A20,20 0 1,1 20,0 A20,20 0 1,1 -20,0" 
+                  fill="url(#mainGradient)">
+                <animateTransform attributeName="transform"
+                                type="rotate"
+                                values="0;360"
+                                dur="8s"
+                                repeatCount="indefinite"/>
+            </path>
+        </g>
+
+        <!-- Animated pupil -->
+        <g transform="translate(200,100)">
+            <path d="M-10,0 A10,10 0 1,1 10,0 A10,10 0 1,1 -10,0" 
+                  fill="#F59C7D">
+                <animate attributeName="d" 
+                         values="M-10,0 A10,10 0 1,1 10,0 A10,10 0 1,1 -10,0;
+                                 M-8,0 A8,8 0 1,1 8,0 A8,8 0 1,1 -8,0;
+                                 M-10,0 A10,10 0 1,1 10,0 A10,10 0 1,1 -10,0" 
+                         dur="4s" repeatCount="indefinite"/>
+            </path>
+            <circle cx="0" cy="0" r="5" fill="white" opacity="0.5">
+                <animate attributeName="r" values="5;4;5" dur="4s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- Scanning effect -->
+        <rect x="160" y="90" width="80" height="20" 
+              fill="url(#scanGradient)" opacity="0.3"/>
+    </g>
+
+    <!-- Text Elements -->
+    <!-- <g id="text-elements">
+        <text x="200" y="170" text-anchor="middle" 
+              font-family="Arial, sans-serif" font-size="36" font-weight="bold" 
+              fill="#F59C7D">ViBeS</text>
+
+        <text x="200" y="190" text-anchor="middle" 
+              font-family="Arial, sans-serif" font-size="12" 
+              fill="#666666">Visual Surveillance and Biometric Security</text>
+    </g> -->
+</svg>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViBeS Research Lab - Chatbot Integration Example</title>
+</head>
+<body>
+    <!-- Your website content goes here -->
+    <h1>ViBeS Research Lab</h1>
+    <p>Welcome to our research lab website!</p>
+
+    <!-- Chatbot container -->
+    <div id="vibes-chatbot"></div>
+
+    <!-- Load the chatbot script -->
+    <script src="chatbot.js"></script>
+    <script>
+        // Initialize the chatbot
+        const chatbot = new ViBeSChatbot('vibes-chatbot', 'http://localhost:8000');
+    </script>
+</body>
+</html> 
