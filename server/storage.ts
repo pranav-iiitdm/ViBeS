@@ -8,7 +8,7 @@ import {
   type InsertTeamMember,
   type InsertStudent
 } from "../shared/schema.js";
-import { supabase } from '../client/src/lib/supabase';
+import { supabase } from './lib/supabase';
 
 export interface IStorage {
   // Projects
