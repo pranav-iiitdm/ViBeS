@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { SupabaseStorage } from '../server/storage';
+import { SupabaseStorage } from './storage';
 
 // Create a storage instance
 const storage = new SupabaseStorage();
