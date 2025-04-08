@@ -2,9 +2,8 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { registerRoutes } from './routes.js';
-import { SupabaseStorage } from './storage.js';
+import { StorageService } from './storage.js';
 import { chatbotService } from './chatbot.js';
-import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,14 +13,9 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 // Initialize storage
-const storage = new SupabaseStorage();
+const storage = new StorageService();
 console.log('Registering routes with storage instance:', storage ? 'provided' : 'undefined');
 
 // Serve static files in production
