@@ -22,7 +22,8 @@ app.use(cors({
     'https://vibes-new.vercel.app',
     'https://vibes-3vyr7mr85-vi-be-s.vercel.app',
     'https://vibes-79bldi0fm-vi-be-s.vercel.app',
-    'https://vibes-pprfx22pi-vi-be-s.vercel.app'
+    'https://vibes-pprfx22pi-vi-be-s.vercel.app',
+    'https://vibes-12chm60hc-vi-be-s.vercel.app'
   ],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -32,18 +33,16 @@ app.use(cors({
 const storage = new SupabaseStorage();
 console.log('Registering routes with storage instance:', storage ? 'provided' : 'undefined');
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(join(__dirname, 'public')));
-  
-  // Handle client-side routing
-  app.get('*', (req, res) => {
-    res.sendFile(join(__dirname, 'public', 'index.html'));
-  });
-}
+// Serve static files
+app.use(express.static(join(__dirname, 'public')));
 
-// Register routes
+// Register API routes before the catch-all route
 registerRoutes(app, storage);
+
+// Handle client-side routing - must be after API routes
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
