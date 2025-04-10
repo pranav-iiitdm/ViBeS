@@ -1,7 +1,7 @@
-import { RAGChatbot } from '../chatbot/rag_chatbot';
+import { chatbotService } from '../server/chatbot';
 
 // Initialize chatbot
-const chatbot = new RAGChatbot();
+const chatbot = chatbotService;
 
 export async function POST(request: Request) {
     try {
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
             });
         }
 
-        const response = await chatbot.chat(text);
+        const response = await chatbot.processQuery(text);
         
         return new Response(JSON.stringify({ response }), {
             status: 200,
