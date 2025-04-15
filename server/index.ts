@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { registerRoutes } from './routes.js';
 import { SupabaseStorage } from './storage.js';
-import { chatbotService } from './chatbot.js';
+import { chatbotServicev5 } from './chatbot_v5.js';
 import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,14 +30,31 @@ app.use(cors({
 }));
 
 // Initialize storage
-const storage = new SupabaseStorage();
-console.log('Registering routes with storage instance:', storage ? 'provided' : 'undefined');
+try {
+  const storage = new SupabaseStorage();
+  console.log('Supabase storage initialized successfully');
+  
+  // Initialize chatbot
+  try {
+    await chatbotServicev5.processQuery('test'); // Test chatbot initialization
+    console.log('Chatbot service initialized successfully');
+  } catch (chatbotError) {
+    console.error('Chatbot initialization error:', chatbotError);
+  }
+  
+  // Register routes with storage
+  registerRoutes(app, storage);
+} catch (storageError) {
+  console.error('Failed to initialize Supabase storage:', storageError);
+  process.exit(1); // Exit if storage fails to initialize
+}
 
 // Serve static files
 app.use(express.static(join(__dirname, 'public')));
 
 // Register API routes before the catch-all route
-registerRoutes(app, storage);
+// This line is redundant as registerRoutes is already called above with storage
+// Removing this line to fix the undefined storage reference
 
 // Handle client-side routing - must be after API routes
 app.get('*', (req, res) => {
