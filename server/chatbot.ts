@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { pipeline } from '@xenova/transformers';
 import { JSONLinesLoader } from "langchain/document_loaders/fs/json";
-import { ChromaClient } from 'chromadb';
+
 
 // Load environment variables
 dotenv.config();
@@ -26,10 +26,7 @@ interface Document {
 class ChatbotService {
   private groqClient: any;
   private embeddingModel: any;
-  private chromaClient: any;
-  private collection: any;
-  private collectionName: string = 'vibes-docs';
-  private embeddingDimension: number = 384; // all-MiniLM-L6-v2 embedding dimension
+  private documents: Document[] = [];
   private isReady: boolean = false;
   private isInitializing: boolean = false;
 
@@ -57,22 +54,8 @@ class ChatbotService {
       this.embeddingModel = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
       console.log('Embedding model loaded');
       
-      // Initialize Chroma client
-      console.log('Connecting to Chroma...');
-      this.chromaClient = new ChromaClient({
-        path: 'http://localhost:8000'
-      });
-      this.collection = await this.chromaClient.getOrCreateCollection({
-        name: this.collectionName,
-        embeddingFunction: async (texts: string[]) => {
-          const results = [];
-          for (const text of texts) {
-            const output = await this.embeddingModel(text, { pooling: 'mean', normalize: true });
-            results.push(Array.from(output.data));
-          }
-          return results;
-        }
-      });
+      // Initialize in-memory storage
+      console.log('Initializing in-memory storage...');
       
       // Load documents
       await this.loadDocuments();
@@ -105,10 +88,6 @@ class ChatbotService {
         .filter(line => line.trim())
         .map(line => line.trim());
       
-      const ids: string[] = [];
-      const contents: string[] = [];
-      const metadatas: Record<string, any>[] = [];
-      
       for (const [i, line] of lines.entries()) {
         try {
           // Clean up the line to ensure valid JSON
@@ -140,12 +119,16 @@ class ChatbotService {
           if (doc.additionalInfo) content += `Additional Info: ${doc.additionalInfo}\n`;
 
           if (content.trim()) {
-            ids.push(`doc-${i}`);
-            contents.push(content.trim());
-            metadatas.push({
+            const document: Document = {
+              id: `doc-${i}`,
+              content: content.trim(),
               type: doc.type || doc.category || 'unknown',
-              ...doc
-            });
+              metadata: {
+                type: doc.type || doc.category || 'unknown',
+                ...doc
+              }
+            };
+            this.documents.push(document);
           }
         } catch (error) {
           console.error(`Error processing document at line ${i + 1}:`, error);
@@ -153,39 +136,43 @@ class ChatbotService {
         }
       }
       
-      if (ids.length > 0) {
-        try {
-          await this.collection.add({
-            ids,
-            documents: contents,
-            metadatas,
-          });
-          console.log(`Loaded ${ids.length} documents into Chroma collection`);
-        } catch (error) {
-          console.error('Error adding documents to Chroma:', error);
-        }
-      } else {
-        console.log('No documents loaded');
-      }
+      console.log(`Loaded ${this.documents.length} documents into memory`);
     } catch (error) {
       console.error('Error loading documents:', error);
     }
   }
 
+  private cosineSimilarity(a: number[], b: number[]): number {
+    if (a.length !== b.length) return 0;
+    const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
+    const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+    const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+    return dotProduct / (magnitudeA * magnitudeB);
+  }
+
   private async findRelevantDocuments(query: string, k: number = 5): Promise<Document[]> {
     try {
-      const results = await this.collection.query({
-        queryTexts: [query],
-        nResults: k,
-      });
+      // Get embedding for the query
+      const queryEmbedding = await this.embeddingModel(query, { pooling: 'mean', normalize: true });
+      const queryVector = Array.from(queryEmbedding.data);
 
-      return results.documents[0].map((content: string, i: number) => ({
-        id: results.ids[0][i],
-        content,
-        type: results.metadatas[0][i].type,
-        metadata: results.metadatas[0][i],
-        score: results.distances[0][i],
+      // Calculate similarity scores for all documents
+      const scoredDocs = await Promise.all(this.documents.map(async (doc) => {
+        if (!doc.embedding) {
+          // Generate embedding if not already present
+          const output = await this.embeddingModel(doc.content, { pooling: 'mean', normalize: true });
+          doc.embedding = Array.from(output.data);
+        }
+        
+        // Calculate cosine similarity
+        const similarity = this.cosineSimilarity(queryVector, doc.embedding);
+        return { ...doc, score: similarity };
       }));
+
+      // Sort by similarity score and return top k
+      return scoredDocs
+        .sort((a, b) => (b.score || 0) - (a.score || 0))
+        .slice(0, k);
     } catch (error) {
       console.error('Error finding relevant documents:', error);
       return [];
@@ -235,7 +222,7 @@ ${context}`
       return 'The chatbot is still initializing. Please try again in a moment.';
     }
 
-    if (!this.collection.count()) {
+    if (this.documents.length === 0) {
       return 'I apologize, but the chatbot is not properly initialized with any documents. Please contact the administrator.';
     }
 
@@ -262,4 +249,4 @@ ${context}`
 }
 
 // Export a singleton instance
-export const chatbotService = new ChatbotService(); 
+export const chatbotService = new ChatbotService();

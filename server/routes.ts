@@ -2,7 +2,8 @@ import express from "express";
 import { type Request, Response } from "express";
 import { createServer } from "http";
 import { IStorage, SupabaseStorage } from "./storage.js";
-import { chatbotService } from "./chatbot.js";
+// import { chatbotServiceV3 } from "./chatbot_v3.js";
+import { chatbotServicev5 } from "./chatbot_v5.js";
 
 export function registerRoutes(app: express.Express, storageService: SupabaseStorage) {
   // Projects routes
@@ -76,7 +77,7 @@ export function registerRoutes(app: express.Express, storageService: SupabaseSto
         });
       }
 
-      const response = await chatbotService.processQuery(text.trim());
+      const response = await chatbotServicev5.processQuery(text.trim());
       
       // Check if response indicates initialization or other known issues
       if (response.includes('still initializing')) {

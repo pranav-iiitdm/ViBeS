@@ -1,7 +1,7 @@
-import { chatbotService } from '../server/chatbot';
+import { chatbotServiceV2 } from '../server/chatbot_v2';
 
 // Initialize chatbot
-const chatbot = chatbotService;
+const chatbot = chatbotServiceV2;
 
 export async function POST(request: Request) {
     try {
