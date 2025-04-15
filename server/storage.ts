@@ -86,14 +86,17 @@ export class SupabaseStorage implements IStorage {
 
   async getPublications(): Promise<Publication[]> {
     try {
+      console.log('Attempting to fetch publications from Supabase');
       const { data, error } = await supabase
         .from('publications')
         .select('*');
       
       if (error) {
         console.error('Error fetching publications:', error);
+        console.error('Error details:', JSON.stringify(error));
         throw error;
       }
+      console.log(`Successfully fetched ${data?.length || 0} publications`);
       return data || [];
     } catch (error) {
       console.error('Error in getPublications:', error);
@@ -122,14 +125,17 @@ export class SupabaseStorage implements IStorage {
 
   async getTeamMembers(): Promise<TeamMember[]> {
     try {
+      console.log('Attempting to fetch team members from Supabase');
       const { data, error } = await supabase
         .from('team_members')
         .select('*');
       
       if (error) {
         console.error('Error fetching team members:', error);
+        console.error('Error details:', JSON.stringify(error));
         throw error;
       }
+      console.log(`Successfully fetched ${data?.length || 0} team members`);
       return data || [];
     } catch (error) {
       console.error('Error in getTeamMembers:', error);
@@ -158,14 +164,17 @@ export class SupabaseStorage implements IStorage {
 
   async getStudents(): Promise<Student[]> {
     try {
+      console.log('Attempting to fetch students from Supabase');
       const { data, error } = await supabase
         .from('students')
         .select('*');
       
       if (error) {
         console.error('Error fetching students:', error);
+        console.error('Error details:', JSON.stringify(error));
         throw error;
       }
+      console.log(`Successfully fetched ${data?.length || 0} students`);
       return data || [];
     } catch (error) {
       console.error('Error in getStudents:', error);

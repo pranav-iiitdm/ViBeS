@@ -34,6 +34,39 @@ try {
   const storage = new SupabaseStorage();
   console.log('Supabase storage initialized successfully');
   
+  // Test database connections to all tables
+  try {
+    console.log('Testing connection to projects table...');
+    const projects = await storage.getProjects();
+    console.log(`Connection successful: Retrieved ${projects.length} projects`);
+  } catch (projectError) {
+    console.error('Error connecting to projects table:', projectError);
+  }
+  
+  try {
+    console.log('Testing connection to publications table...');
+    const publications = await storage.getPublications();
+    console.log(`Connection successful: Retrieved ${publications.length} publications`);
+  } catch (pubError) {
+    console.error('Error connecting to publications table:', pubError);
+  }
+  
+  try {
+    console.log('Testing connection to team_members table...');
+    const teamMembers = await storage.getTeamMembers();
+    console.log(`Connection successful: Retrieved ${teamMembers.length} team members`);
+  } catch (teamError) {
+    console.error('Error connecting to team_members table:', teamError);
+  }
+  
+  try {
+    console.log('Testing connection to students table...');
+    const students = await storage.getStudents();
+    console.log(`Connection successful: Retrieved ${students.length} students`);
+  } catch (studentError) {
+    console.error('Error connecting to students table:', studentError);
+  }
+  
   // Initialize chatbot
   try {
     await chatbotServicev5.processQuery('test'); // Test chatbot initialization
