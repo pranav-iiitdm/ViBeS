@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Publication, TeamMember } from "@shared/schema";
+import { api } from "@/lib/api";
 
 const researchAreas = [
   {
@@ -33,12 +34,25 @@ const researchAreas = [
 ];
 
 export default function Home() {
-  const { data: publications = [] } = useQuery<Publication[]>({
-    queryKey: ["/api/publications"]
+  const { data: publications = [], isLoading: pubsLoading, error: pubsError } = useQuery<Publication[]>({
+    queryKey: ["publications-home"],
+    queryFn: () => api.getPublications(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
-  const { data: team = [] } = useQuery<TeamMember[]>({
-    queryKey: ["/api/team"]
+  const { data: team = [], isLoading: teamLoading, error: teamError } = useQuery<TeamMember[]>({
+    queryKey: ["team-home"],
+    queryFn: () => api.getTeamMembers(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
+
+  console.log("Home data:", { 
+    publications: publications.length, 
+    team: team.length,
+    pubsError: pubsError ? String(pubsError) : null,
+    teamError: teamError ? String(teamError) : null
   });
 
   return (

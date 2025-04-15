@@ -135,8 +135,23 @@ export class SupabaseStorage implements IStorage {
         console.error('Error details:', JSON.stringify(error));
         throw error;
       }
-      console.log(`Successfully fetched ${data?.length || 0} team members`);
-      return data || [];
+      
+      // Transform snake_case to camelCase
+      const formattedData = data?.map(member => ({
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        bio: member.bio,
+        image: member.image,
+        googleScholarUrl: member.google_scholar_url,
+        researchGateUrl: member.research_gate_url,
+        researchInterests: member.research_interests,
+        linkedinUrl: member.linkedin_url,
+        additionalInfo: member.additional_info
+      })) || [];
+      
+      console.log(`Successfully fetched ${formattedData.length} team members`);
+      return formattedData;
     } catch (error) {
       console.error('Error in getTeamMembers:', error);
       throw error;
@@ -174,8 +189,24 @@ export class SupabaseStorage implements IStorage {
         console.error('Error details:', JSON.stringify(error));
         throw error;
       }
-      console.log(`Successfully fetched ${data?.length || 0} students`);
-      return data || [];
+      
+      // Transform snake_case to camelCase
+      const formattedData = data?.map(student => ({
+        id: student.id,
+        name: student.name,
+        bio: student.bio,
+        projects: student.projects,
+        category: student.category,
+        image: student.image,
+        googleScholarUrl: student.google_scholar_url,
+        researchGateUrl: student.research_gate_url,
+        researchInterests: student.research_interests,
+        linkedinUrl: student.linkedin_url,
+        additionalInfo: student.additional_info
+      })) || [];
+      
+      console.log(`Successfully fetched ${formattedData.length} students`);
+      return formattedData;
     } catch (error) {
       console.error('Error in getStudents:', error);
       throw error;
