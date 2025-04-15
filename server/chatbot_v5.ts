@@ -380,6 +380,25 @@ class ChatbotServiceV5 {
     await this.neo4jGraph.close();
     await this.driver.close();
   }
+
+  public async initializeForClient(): Promise<void> {
+    if (this.isReady) {
+      console.log("Chatbot already initialized");
+      return;
+    }
+    
+    console.log("Starting client-requested warm-up");
+    
+    try {
+      // Force a sample query to warm up the system
+      const warmupText = "What research areas do you focus on?";
+      await this.processQuery(warmupText);
+      console.log("Chatbot warm-up complete");
+    } catch (error) {
+      console.error("Chatbot warm-up failed:", error);
+      throw error;
+    }
+  }
 }
 
 export const chatbotServicev5 = new ChatbotServiceV5();

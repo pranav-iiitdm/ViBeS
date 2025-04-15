@@ -579,6 +579,7 @@ export function Chatbot() {
   const [isMinimized, setIsMinimized] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const [chatbotStatus, setChatbotStatus] = useState<"ready" | "initializing" | "error">("ready")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -624,6 +625,11 @@ export function Chatbot() {
     scrollToBottom()
 
     try {
+      // Set status to initializing to prevent multiple retries
+      if (chatbotStatus === "error") {
+        setChatbotStatus("initializing")
+      }
+
       const response = await fetch(`${API_BASE_URL}/chatbot`, {
         method: "POST",
         headers: {
@@ -634,7 +640,9 @@ export function Chatbot() {
 
       // Handle service unavailable (503) specifically
       if (response.status === 503) {
-        const data = await response.json();
+        const data = await response.json()
+        
+        setChatbotStatus("initializing")
         
         setTimeout(() => {
           setIsTyping(false)
@@ -658,9 +666,15 @@ export function Chatbot() {
               },
               body: JSON.stringify({ text: userMessage }),
             })
-            .then(retryResponse => retryResponse.json())
+            .then(retryResponse => {
+              if (!retryResponse.ok) {
+                throw new Error(`HTTP error ${retryResponse.status}`)
+              }
+              return retryResponse.json()
+            })
             .then(retryData => {
               setIsTyping(false)
+              setChatbotStatus("ready")
               const botMessage: Message = {
                 id: (Date.now() + 2).toString(),
                 text: retryData.response || "Sorry, I'm still getting ready. Please try again later.",
@@ -669,11 +683,13 @@ export function Chatbot() {
               }
               setMessages((prev) => [...prev, botMessage])
             })
-            .catch(() => {
+            .catch((retryError) => {
+              console.error("Retry error:", retryError)
               setIsTyping(false)
+              setChatbotStatus("error")
               const errorMessage: Message = {
                 id: (Date.now() + 2).toString(),
-                text: "I'm still getting ready. Please try again in a moment.",
+                text: "I'm having trouble connecting to my knowledge base. Please try again in a moment.",
                 type: "bot",
                 timestamp: new Date(),
               }
@@ -681,10 +697,15 @@ export function Chatbot() {
             })
           }, 5000)
         }, 1000)
-        return;
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`)
       }
 
       const data = await response.json()
+      setChatbotStatus("ready")
 
       // Add a small delay to make the typing indicator more realistic
       setTimeout(() => {
@@ -701,6 +722,7 @@ export function Chatbot() {
       }, 1000)
     } catch (error) {
       console.error("Chat error:", error)
+      setChatbotStatus("error")
 
       setTimeout(() => {
         setIsTyping(false)

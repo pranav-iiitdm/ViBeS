@@ -273,5 +273,24 @@ export function registerRoutes(app: express.Express, storageService: SupabaseSto
     }
   });
 
+  // Add a new route for chatbot initialization/warmup that will be called when the homepage loads
+  app.get("/api/chatbot/init", async (req, res) => {
+    try {
+      // This route is just to trigger the chatbot to start warming up
+      console.log("Received chatbot warm-up request");
+      
+      // Start the initialization process in the background
+      chatbotServicev5.initializeForClient().catch(err => 
+        console.error("Background initialization error:", err)
+      );
+      
+      // Return immediately to not block the client
+      res.json({ status: "Chatbot warm-up initiated" });
+    } catch (error) {
+      console.error('Error initiating chatbot warm-up:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   return createServer(app);
 }

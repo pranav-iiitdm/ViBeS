@@ -3,8 +3,12 @@ import { fadeIn, staggerChildren } from "@/lib/animations";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import type { Publication, TeamMember } from "@shared/schema";
 import { api } from "@/lib/api";
+
+// Define the API base URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const researchAreas = [
   {
@@ -47,6 +51,23 @@ export default function Home() {
     retry: 1,
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
+
+  // Initialize the chatbot when the home page loads
+  useEffect(() => {
+    // Call the initialization endpoint to warm up the chatbot
+    const initChatbot = async () => {
+      try {
+        console.log("Initializing chatbot on page load...");
+        const response = await fetch(`${API_BASE_URL}/chatbot/init`);
+        const data = await response.json();
+        console.log("Chatbot initialization:", data);
+      } catch (error) {
+        console.error("Failed to initialize chatbot:", error);
+      }
+    };
+
+    initChatbot();
+  }, []);
 
   console.log("Home data:", { 
     publications: publications.length, 
