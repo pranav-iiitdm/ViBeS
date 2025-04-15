@@ -14,6 +14,7 @@ import Gallery from "@/pages/Gallery";
 import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
 import Chatbot from "@/components/Chatbot";
+import DiagnosticTool from "@/components/DiagnosticTool";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
           <Route path="/publications" component={Publications} />
           <Route path="/gallery" component={Gallery} />
           <Route path="/contact" component={Contact} />
+          <Route path="/debug" component={DiagnosticTool} />
           <Route component={NotFound} />
         </Switch>
       </main>

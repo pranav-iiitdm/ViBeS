@@ -5,7 +5,94 @@ import { IStorage, SupabaseStorage } from "./storage.js";
 // import { chatbotServiceV3 } from "./chatbot_v3.js";
 import { chatbotServicev5 } from "./chatbot_v5.js";
 
+// Define interfaces for type safety
+interface TableStatus {
+  status: 'success' | 'error';
+  count?: number;
+  sample?: number | null;
+  message?: string;
+}
+
+interface DiagnosticResult {
+  serverTime: string;
+  environment: string;
+  tables: Record<string, TableStatus>;
+}
+
 export function registerRoutes(app: express.Express, storageService: SupabaseStorage) {
+  // Add diagnostic endpoint
+  app.get("/api/status", async (req, res) => {
+    try {
+      const results: DiagnosticResult = {
+        serverTime: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        tables: {}
+      };
+      
+      // Test connections to all tables
+      try {
+        const projects = await storageService.getProjects();
+        results.tables['projects'] = {
+          status: 'success',
+          count: projects.length,
+          sample: projects.length > 0 ? projects[0].id : null
+        };
+      } catch (error: any) {
+        results.tables['projects'] = {
+          status: 'error',
+          message: error?.message || 'Unknown error'
+        };
+      }
+      
+      try {
+        const publications = await storageService.getPublications();
+        results.tables['publications'] = {
+          status: 'success',
+          count: publications.length,
+          sample: publications.length > 0 ? publications[0].id : null
+        };
+      } catch (error: any) {
+        results.tables['publications'] = {
+          status: 'error',
+          message: error?.message || 'Unknown error'
+        };
+      }
+      
+      try {
+        const teamMembers = await storageService.getTeamMembers();
+        results.tables['team_members'] = {
+          status: 'success',
+          count: teamMembers.length,
+          sample: teamMembers.length > 0 ? teamMembers[0].id : null
+        };
+      } catch (error: any) {
+        results.tables['team_members'] = {
+          status: 'error',
+          message: error?.message || 'Unknown error'
+        };
+      }
+      
+      try {
+        const students = await storageService.getStudents();
+        results.tables['students'] = {
+          status: 'success',
+          count: students.length,
+          sample: students.length > 0 ? students[0].id : null
+        };
+      } catch (error: any) {
+        results.tables['students'] = {
+          status: 'error',
+          message: error?.message || 'Unknown error'
+        };
+      }
+      
+      res.json(results);
+    } catch (error: any) {
+      console.error("Diagnostic endpoint error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Projects routes
   app.get("/api/projects", async (req, res) => {
     try {
