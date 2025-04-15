@@ -1,5 +1,5 @@
 import express from 'express';
-import { SupabaseStorage } from '../server/storage.js';
+import { SupabaseStorage } from './storage.ts';
 import { registerRoutes } from '../server/routes.js';
 import cors from 'cors';
 import path from 'path';
