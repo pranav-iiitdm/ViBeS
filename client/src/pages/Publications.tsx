@@ -387,14 +387,25 @@ import { fadeIn, staggerChildren } from "@/lib/animations";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import type { Publication } from "@shared/schema";
+import { api } from "@/lib/api";
 
 export default function Publications() {
-  const { data: publications = [] } = useQuery<Publication[]>({
-    queryKey: ["/api/publications"],
+  const { data: publications = [], isLoading, error } = useQuery<Publication[]>({
+    queryKey: ["publications"],
+    queryFn: () => api.getPublications()
   });
 
   const [activeTab, setActiveTab] = useState<"journal" | "conference">("journal");
   const [expandedAbstracts, setExpandedAbstracts] = useState<Record<string, boolean>>({});
+
+  if (isLoading) {
+    return <div className="container py-16 text-center">Loading publications...</div>;
+  }
+
+  if (error) {
+    console.error("Error loading publications:", error);
+    return <div className="container py-16 text-center">Failed to load publications. Please try again later.</div>;
+  }
 
   // Filter publications based on the active tab
   const filteredPublications = publications.filter(

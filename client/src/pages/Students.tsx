@@ -76,13 +76,24 @@ import { motion } from "framer-motion";
 import { fadeIn, staggerChildren } from "@/lib/animations";
 import ProfileCard from "@/components/team/ProfileCard";
 import type { Student } from "@shared/schema";
+import { api } from "@/lib/api";
 
 export default function Students() {
-  const { data: students = [] } = useQuery<Student[]>({
-    queryKey: ["/api/students"],
+  const { data: students = [], isLoading, error } = useQuery<Student[]>({
+    queryKey: ["students"],
+    queryFn: () => api.getStudents()
   });
 
   const [activeTab, setActiveTab] = useState<"PG" | "UG" | "Alumni">("PG");
+
+  if (isLoading) {
+    return <div className="container py-16 text-center">Loading students data...</div>;
+  }
+
+  if (error) {
+    console.error("Error loading students data:", error);
+    return <div className="container py-16 text-center">Failed to load students data. Please try again later.</div>;
+  }
 
   // Filter students based on the active tab
   const filteredStudents = students.filter((student) => student.category === activeTab);

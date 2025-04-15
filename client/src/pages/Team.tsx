@@ -3,11 +3,22 @@ import { motion } from "framer-motion";
 import { fadeIn, staggerChildren } from "@/lib/animations";
 import ProfileCard from "@/components/team/ProfileCard";
 import type { TeamMember } from "@shared/schema";
+import { api } from "@/lib/api";
 
 export default function Team() {
-  const { data: team = [] } = useQuery<TeamMember[]>({
-    queryKey: ["/api/team"]
+  const { data: team = [], isLoading, error } = useQuery<TeamMember[]>({
+    queryKey: ["team-members"],
+    queryFn: () => api.getTeamMembers()
   });
+
+  if (isLoading) {
+    return <div className="container py-16 text-center">Loading team members...</div>;
+  }
+
+  if (error) {
+    console.error("Error loading team members:", error);
+    return <div className="container py-16 text-center">Failed to load team members. Please try again later.</div>;
+  }
 
   return (
     <div className="container px-4 py-16 mx-auto">
