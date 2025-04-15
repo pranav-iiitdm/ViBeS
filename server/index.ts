@@ -23,10 +23,17 @@ app.use(cors({
     'https://vibes-3vyr7mr85-vi-be-s.vercel.app',
     'https://vibes-79bldi0fm-vi-be-s.vercel.app',
     'https://vibes-pprfx22pi-vi-be-s.vercel.app',
-    'https://vibes-12chm60hc-vi-be-s.vercel.app'
+    'https://vibes-12chm60hc-vi-be-s.vercel.app',
+    'https://vibes-new-git-main-vi-be-s.vercel.app',
+    'https://vi-be-s-s6o2-git-main-vi-be-s.vercel.app',
+    'https://vi-be-s-s9xo.vercel.app',
+    'https://vi-be-s-vi-be-s.vercel.app',
+    'https://vi-be-s-glyi-git-main-vi-be-s.vercel.app',
+    'https://vibes-6q1lojwle-vi-be-s.vercel.app'
   ],
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 // Initialize storage
