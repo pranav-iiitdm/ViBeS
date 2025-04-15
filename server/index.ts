@@ -14,26 +14,27 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+
+// Request logging middleware for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('  Headers:', JSON.stringify({
+    origin: req.headers.origin,
+    referer: req.headers.referer,
+    host: req.headers.host
+  }));
+  next();
+});
+
+// CORS configuration - allow all Vercel deployments during development
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://localhost:5174',
-    'https://vibes-pp4bjpx0b-vi-be-s.vercel.app',
-    'https://vibes-new.vercel.app',
-    'https://vibes-3vyr7mr85-vi-be-s.vercel.app',
-    'https://vibes-79bldi0fm-vi-be-s.vercel.app',
-    'https://vibes-pprfx22pi-vi-be-s.vercel.app',
-    'https://vibes-12chm60hc-vi-be-s.vercel.app',
-    'https://vibes-new-git-main-vi-be-s.vercel.app',
-    'https://vi-be-s-s6o2-git-main-vi-be-s.vercel.app',
-    'https://vi-be-s-s9xo.vercel.app',
-    'https://vi-be-s-vi-be-s.vercel.app',
-    'https://vi-be-s-glyi-git-main-vi-be-s.vercel.app',
-    'https://vibes-6q1lojwle-vi-be-s.vercel.app'
-  ],
+  // Either use an allowlist or allow all origins with credentials: false
+  // For now, allow all origins since we're troubleshooting
+  origin: '*', 
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  // When using origin: '*', credentials must be false
+  credentials: false
 }));
 
 // Initialize storage

@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { IStorage, SupabaseStorage } from "./storage.js";
 // import { chatbotServiceV3 } from "./chatbot_v3.js";
 import { chatbotServicev5 } from "./chatbot_v5.js";
+import { supabase } from "./supabase.js";
 
 // Define interfaces for type safety
 interface TableStatus {
@@ -20,6 +21,85 @@ interface DiagnosticResult {
 }
 
 export function registerRoutes(app: express.Express, storageService: SupabaseStorage) {
+  // Debug endpoint that directly accesses database tables
+  app.get("/api/debug/tables", async (req, res) => {
+    try {
+      const results: Record<string, any> = {
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        tables: {}
+      };
+      
+      // Try to fetch from each table directly
+      try {
+        const response = await supabase.from('projects').select('id').limit(3);
+        results.tables.projects = {
+          success: !response.error,
+          count: response.data?.length || 0,
+          error: response.error?.message,
+          sample: response.data?.map(d => d.id) || []
+        };
+      } catch (error: any) {
+        results.tables.projects = {
+          success: false, 
+          error: error?.message || String(error)
+        };
+      }
+      
+      try {
+        const response = await supabase.from('publications').select('id').limit(3);
+        results.tables.publications = {
+          success: !response.error,
+          count: response.data?.length || 0,
+          error: response.error?.message,
+          sample: response.data?.map(d => d.id) || []
+        };
+      } catch (error: any) {
+        results.tables.publications = {
+          success: false, 
+          error: error?.message || String(error)
+        };
+      }
+      
+      try {
+        const response = await supabase.from('team_members').select('id').limit(3);
+        results.tables.team_members = {
+          success: !response.error,
+          count: response.data?.length || 0,
+          error: response.error?.message,
+          sample: response.data?.map(d => d.id) || []
+        };
+      } catch (error: any) {
+        results.tables.team_members = {
+          success: false, 
+          error: error?.message || String(error)
+        };
+      }
+      
+      try {
+        const response = await supabase.from('students').select('id').limit(3);
+        results.tables.students = {
+          success: !response.error,
+          count: response.data?.length || 0,
+          error: response.error?.message,
+          sample: response.data?.map(d => d.id) || []
+        };
+      } catch (error: any) {
+        results.tables.students = {
+          success: false, 
+          error: error?.message || String(error)
+        };
+      }
+      
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: error?.message || String(error)
+      });
+    }
+  });
+
   // Add diagnostic endpoint
   app.get("/api/status", async (req, res) => {
     try {
