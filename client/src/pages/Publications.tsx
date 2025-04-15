@@ -392,7 +392,9 @@ import { api } from "@/lib/api";
 export default function Publications() {
   const { data: publications = [], isLoading, error } = useQuery<Publication[]>({
     queryKey: ["publications"],
-    queryFn: () => api.getPublications()
+    queryFn: () => api.getPublications(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   const [activeTab, setActiveTab] = useState<"journal" | "conference">("journal");
@@ -404,8 +406,18 @@ export default function Publications() {
 
   if (error) {
     console.error("Error loading publications:", error);
-    return <div className="container py-16 text-center">Failed to load publications. Please try again later.</div>;
+    return (
+      <div className="container py-16 text-center">
+        <p className="text-red-500 mb-4">Failed to load publications.</p>
+        <p className="text-muted-foreground">Please try again later.</p>
+        <pre className="text-xs bg-gray-100 p-2 mt-4 rounded max-w-md mx-auto overflow-auto">
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
+      </div>
+    );
   }
+
+  console.log("Publications data loaded:", publications);
 
   // Filter publications based on the active tab
   const filteredPublications = publications.filter(

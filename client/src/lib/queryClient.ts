@@ -16,14 +16,14 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  const baseUrl = import.meta.env.VITE_API_URL || '/api';
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? url : `/${url}`}`;
   
   console.log(`Making API request to: ${fullUrl}`, {
     method,
     data,
     baseUrl,
-    environment: process.env.NODE_ENV
+    environment: import.meta.env.MODE
   });
   
   try {
@@ -50,13 +50,13 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_API_URL || '/api';
     const url = queryKey[0] as string;
-    const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+    const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? url : `/${url}`}`;
     
     console.log(`Making query request to: ${fullUrl}`, {
       baseUrl,
-      environment: process.env.NODE_ENV
+      environment: import.meta.env.MODE
     });
     
     try {

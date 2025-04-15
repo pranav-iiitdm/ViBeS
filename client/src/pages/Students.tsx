@@ -81,7 +81,9 @@ import { api } from "@/lib/api";
 export default function Students() {
   const { data: students = [], isLoading, error } = useQuery<Student[]>({
     queryKey: ["students"],
-    queryFn: () => api.getStudents()
+    queryFn: () => api.getStudents(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   const [activeTab, setActiveTab] = useState<"PG" | "UG" | "Alumni">("PG");
@@ -92,8 +94,18 @@ export default function Students() {
 
   if (error) {
     console.error("Error loading students data:", error);
-    return <div className="container py-16 text-center">Failed to load students data. Please try again later.</div>;
+    return (
+      <div className="container py-16 text-center">
+        <p className="text-red-500 mb-4">Failed to load students data.</p>
+        <p className="text-muted-foreground">Please try again later.</p>
+        <pre className="text-xs bg-gray-100 p-2 mt-4 rounded max-w-md mx-auto overflow-auto">
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
+      </div>
+    );
   }
+
+  console.log("Students data loaded:", students);
 
   // Filter students based on the active tab
   const filteredStudents = students.filter((student) => student.category === activeTab);

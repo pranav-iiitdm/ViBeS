@@ -7,8 +7,10 @@ import { api } from "@/lib/api";
 
 export default function Team() {
   const { data: team = [], isLoading, error } = useQuery<TeamMember[]>({
-    queryKey: ["team-members"],
-    queryFn: () => api.getTeamMembers()
+    queryKey: ["team"],
+    queryFn: () => api.getTeamMembers(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   if (isLoading) {
@@ -17,8 +19,18 @@ export default function Team() {
 
   if (error) {
     console.error("Error loading team members:", error);
-    return <div className="container py-16 text-center">Failed to load team members. Please try again later.</div>;
+    return (
+      <div className="container py-16 text-center">
+        <p className="text-red-500 mb-4">Failed to load team members.</p>
+        <p className="text-muted-foreground">Please try again later.</p>
+        <pre className="text-xs bg-gray-100 p-2 mt-4 rounded max-w-md mx-auto overflow-auto">
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
+      </div>
+    );
   }
+
+  console.log("Team data loaded:", team);
 
   return (
     <div className="container px-4 py-16 mx-auto">
@@ -39,13 +51,17 @@ export default function Team() {
           variants={staggerChildren}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {team.map(member => (
-            <ProfileCard
-              key={member.id}
-              profile={member}
-              type="team"
-            />
-          ))}
+          {team.length > 0 ? (
+            team.map(member => (
+              <ProfileCard
+                key={member.id}
+                profile={member}
+                type="team"
+              />
+            ))
+          ) : (
+            <p className="col-span-full text-center text-muted-foreground">No team members found.</p>
+          )}
         </motion.div>
 
         <motion.div
