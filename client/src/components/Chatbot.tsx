@@ -632,6 +632,58 @@ export function Chatbot() {
         body: JSON.stringify({ text: userMessage }),
       })
 
+      // Handle service unavailable (503) specifically
+      if (response.status === 503) {
+        const data = await response.json();
+        
+        setTimeout(() => {
+          setIsTyping(false)
+
+          const initMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: "I'm still warming up my knowledge base. Please try again in a few seconds.",
+            type: "bot",
+            timestamp: new Date(),
+          }
+
+          setMessages((prev) => [...prev, initMessage])
+          
+          // Automatically retry after 5 seconds
+          setTimeout(() => {
+            setIsTyping(true)
+            fetch(`${API_BASE_URL}/chatbot`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ text: userMessage }),
+            })
+            .then(retryResponse => retryResponse.json())
+            .then(retryData => {
+              setIsTyping(false)
+              const botMessage: Message = {
+                id: (Date.now() + 2).toString(),
+                text: retryData.response || "Sorry, I'm still getting ready. Please try again later.",
+                type: "bot",
+                timestamp: new Date(),
+              }
+              setMessages((prev) => [...prev, botMessage])
+            })
+            .catch(() => {
+              setIsTyping(false)
+              const errorMessage: Message = {
+                id: (Date.now() + 2).toString(),
+                text: "I'm still getting ready. Please try again in a moment.",
+                type: "bot",
+                timestamp: new Date(),
+              }
+              setMessages((prev) => [...prev, errorMessage])
+            })
+          }, 5000)
+        }, 1000)
+        return;
+      }
+
       const data = await response.json()
 
       // Add a small delay to make the typing indicator more realistic

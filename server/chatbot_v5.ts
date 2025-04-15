@@ -55,7 +55,35 @@ class ChatbotServiceV5 {
   private async initialize() {
     try {
       console.log("Initializing chatbot with Neo4j...");
-      await this.neo4jGraph.verifyConnectivity();
+      
+      // Add connection timeout and retry
+      let connected = false;
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (!connected && attempts < maxAttempts) {
+        try {
+          attempts++;
+          console.log(`Neo4j connection attempt ${attempts}/${maxAttempts}...`);
+          await this.neo4jGraph.verifyConnectivity();
+          connected = true;
+          console.log("Successfully connected to Neo4j database");
+        } catch (connError) {
+          console.error(`Connection attempt ${attempts} failed:`, connError);
+          if (attempts < maxAttempts) {
+            console.log(`Retrying in 2 seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+      }
+      
+      if (!connected) {
+        console.error("Failed to connect to Neo4j after multiple attempts");
+        // Still set isReady so we can provide a fallback experience
+        this.isReady = true;
+        return;
+      }
+      
       await this.neo4jGraph.refreshSchema();
 
       // Check and create full-text index if needed
@@ -65,7 +93,8 @@ class ChatbotServiceV5 {
       console.log("Chatbot ready with Neo4j backend");
     } catch (error) {
       console.error("Initialization failed:", error);
-      throw error;
+      // Set isReady to true anyway so we can provide a fallback experience
+      this.isReady = true;
     }
   }
 
@@ -113,6 +142,11 @@ class ChatbotServiceV5 {
     }
 
     try {
+      // If Neo4j connection failed but we're still providing service
+      if (!this.neo4jGraph) {
+        return "I'm currently operating with limited functionality. I can still try to answer general questions about the research lab.";
+      }
+      
       const results = await this.searchEntireGraph(query);
       if (results.length === 0) {
         return "I couldn't find relevant information. Could you try rephrasing your question?";
