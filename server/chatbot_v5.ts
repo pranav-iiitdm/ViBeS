@@ -28,7 +28,6 @@ class ChatbotServiceV5 {
     const neo4jPassword =
       process.env.NEO4J_PASSWORD ||
       "ZZciq7iG-3yfEby0pqoz6Hq6jbeUNcx_iciP-nzpZJA";
-    // Initialize Neo4j connection
 
     this.neo4jGraph = new Neo4jGraph({
       url: neo4jUri,
