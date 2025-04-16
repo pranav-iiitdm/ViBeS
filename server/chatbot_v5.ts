@@ -28,6 +28,11 @@ class ChatbotServiceV5 {
     const neo4jPassword =
       process.env.NEO4J_PASSWORD ||
       "ZZciq7iG-3yfEby0pqoz6Hq6jbeUNcx_iciP-nzpZJA";
+    
+    console.log("Neo4j connection info:");
+    console.log(`URI: ${neo4jUri.replace(/\/\/([^:]+):[^@]+@/, '//***:***@')}`); // Hide password in logs
+    console.log(`User: ${neo4jUser}`);
+    console.log(`Password: ${neo4jPassword ? '***' : 'Not provided'}`);
 
     this.neo4jGraph = new Neo4jGraph({
       url: neo4jUri,
@@ -142,8 +147,9 @@ class ChatbotServiceV5 {
 
     try {
       // If Neo4j connection failed but we're still providing service
-      if (!this.neo4jGraph) {
-        return "I'm currently operating with limited functionality. I can still try to answer general questions about the research lab.";
+      if (!this.neo4jGraph || !this.driver) {
+        console.log("Using fallback response system (Neo4j not available)");
+        return this.generateFallbackResponse(query);
       }
       
       const results = await this.searchEntireGraph(query);
@@ -153,7 +159,7 @@ class ChatbotServiceV5 {
       return this.generateResponse(query, results);
     } catch (error) {
       console.error("Error processing query:", error);
-      return "I encountered an error while processing your query. Please try again later.";
+      return this.generateFallbackResponse(query);
     }
   }
 
@@ -373,6 +379,34 @@ class ChatbotServiceV5 {
     ]);
 
     return response.content.toString();
+  }
+
+  private generateFallbackResponse(query: string): string {
+    // This method provides basic responses without needing Neo4j
+    const lowercaseQuery = query.toLowerCase();
+    
+    // Research areas
+    if (lowercaseQuery.includes("research") && (lowercaseQuery.includes("area") || lowercaseQuery.includes("focus"))) {
+      return "The ViBeS Lab focuses on several key research areas including Visual Surveillance, Edge Computing, Generative Models, and Biometrics. Each area represents cutting-edge work in computer vision and AI.";
+    }
+    
+    // Team information
+    if (lowercaseQuery.includes("team") || lowercaseQuery.includes("professor") || lowercaseQuery.includes("faculty")) {
+      return "Our team consists of faculty members, researchers, and students working collaboratively on visual biometrics and surveillance technologies. For detailed profiles, please check the team page on our website.";
+    }
+    
+    // Publications
+    if (lowercaseQuery.includes("publication") || lowercaseQuery.includes("paper") || lowercaseQuery.includes("journal")) {
+      return "Our lab has published numerous papers in top conferences and journals. Recent publications focus on advanced computer vision algorithms, biometric systems, and AI-based surveillance. You can find the full publication list on our website.";
+    }
+    
+    // Projects
+    if (lowercaseQuery.includes("project") || lowercaseQuery.includes("work")) {
+      return "Current projects at ViBeS Lab include developing privacy-preserving surveillance systems, efficient biometric recognition for edge devices, and novel applications of generative AI for synthetic data generation.";
+    }
+    
+    // Default response
+    return "I'm currently operating with limited functionality. I can provide general information about our research lab, but for specific details, please browse the website sections or try again later when full functionality is restored.";
   }
 
   public async close() {

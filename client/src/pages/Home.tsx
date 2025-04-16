@@ -59,6 +59,9 @@ export default function Home() {
       try {
         console.log("Initializing chatbot on page load...");
         const response = await fetch(`${API_BASE_URL}/chatbot/init`);
+        if (!response.ok) {
+          throw new Error(`Failed to initialize chatbot: ${response.status}`);
+        }
         const data = await response.json();
         console.log("Chatbot initialization:", data);
       } catch (error) {

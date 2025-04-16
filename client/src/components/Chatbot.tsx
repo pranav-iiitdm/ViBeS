@@ -641,6 +641,7 @@ export function Chatbot() {
       // Handle service unavailable (503) specifically
       if (response.status === 503) {
         const data = await response.json()
+        const retryAfter = parseInt(response.headers.get('Retry-After') || '5', 10)
         
         setChatbotStatus("initializing")
         
@@ -649,14 +650,14 @@ export function Chatbot() {
 
           const initMessage: Message = {
             id: (Date.now() + 1).toString(),
-            text: "I'm still warming up my knowledge base. Please try again in a few seconds.",
+            text: data.message || "I'm still warming up my knowledge base. Please try again in a few seconds.",
             type: "bot",
             timestamp: new Date(),
           }
 
           setMessages((prev) => [...prev, initMessage])
           
-          // Automatically retry after 5 seconds
+          // Automatically retry after the specified time
           setTimeout(() => {
             setIsTyping(true)
             fetch(`${API_BASE_URL}/chatbot`, {
@@ -695,7 +696,7 @@ export function Chatbot() {
               }
               setMessages((prev) => [...prev, errorMessage])
             })
-          }, 5000)
+          }, retryAfter * 1000)
         }, 1000)
         return
       }
