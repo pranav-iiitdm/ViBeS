@@ -20,6 +20,7 @@ class ChatbotServiceV5 {
   private chain: GraphCypherQAChain;
   private isReady: boolean = false;
   private fullTextIndexExists: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
 
   constructor() {
     const neo4jUri =
@@ -53,10 +54,10 @@ class ChatbotServiceV5 {
       returnDirect: true, // Return raw database results
     });
 
-    this.initialize();
+    this.initializationPromise = this.initialize();
   }
 
-  private async initialize() {
+  private async initialize(): Promise<void> {
     try {
       console.log("Initializing chatbot with Neo4j...");
       
@@ -451,6 +452,15 @@ class ChatbotServiceV5 {
   public async close() {
     await this.neo4jGraph.close();
     await this.driver.close();
+  }
+
+  public async ensureInitialized(): Promise<void> {
+    if (!this.initializationPromise) {
+      // Should ideally not happen if constructor logic is sound
+      console.error("Initialization promise not set!");
+      this.initializationPromise = this.initialize();
+    }
+    await this.initializationPromise;
   }
 
   public async initializeForClient(): Promise<void> {

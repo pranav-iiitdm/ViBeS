@@ -17,6 +17,7 @@ export async function POST(request: Request) {
         }
 
         try {
+            await chatbot.ensureInitialized(); // Wait for initialization
             const response = await chatbot.processQuery(text.trim());
             
             // Check if response indicates initialization or other known issues
