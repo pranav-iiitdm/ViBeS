@@ -1,8 +1,9 @@
 import { GraphCypherQAChain } from "@langchain/community/chains/graph_qa/cypher";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
-import { Driver, session as neo4jSession, Record } from "neo4j-driver";
+import { Driver, session as neo4jSession, Record, Session } from "neo4j-driver";
 import dotenv from "dotenv";
+import neo4j from "neo4j-driver"; // Import full neo4j-driver
 
 // Load environment variables
 dotenv.config();
@@ -35,13 +36,31 @@ class ChatbotServiceV5 {
     console.log(`User: ${neo4jUser}`);
     console.log(`Password: ${neo4jPassword ? '***' : 'Not provided'}`);
 
+    // Set Neo4j driver configuration with timeouts
+    const neo4jConfig = {
+      maxConnectionLifetime: 30000, // 30 seconds max connection lifetime
+      connectionAcquisitionTimeout: 20000, // 20 seconds to acquire a connection
+      connectionTimeout: 15000, // 15 seconds to establish a connection
+    };
+    
+    console.log("[constructor] Using Neo4j connection config:", neo4jConfig);
+
+    // Create a driver directly with configured timeouts
+    const driver = neo4j.driver(
+      neo4jUri,
+      neo4j.auth.basic(neo4jUser, neo4jPassword),
+      neo4jConfig
+    );
+
     this.neo4jGraph = new Neo4jGraph({
       url: neo4jUri,
       username: neo4jUser,
       password: neo4jPassword,
     });
 
-    this.driver = (this.neo4jGraph as any).driver;
+    // Override the driver with our custom configured one
+    this.driver = driver;
+    (this.neo4jGraph as any).driver = driver;
 
     const llm = new ChatGoogleGenerativeAI({
       model: "gemini-1.5-pro",
@@ -91,13 +110,27 @@ class ChatbotServiceV5 {
       }
       
       console.log("[initialize] Refreshing Neo4j schema...");
-      await this.neo4jGraph.refreshSchema();
-      console.log("[initialize] Neo4j schema refreshed.");
+      try {
+        // Use the new timeout method instead
+        await this.refreshSchemaWithTimeout(30000); // 30 seconds timeout
+        console.log(`[initialize] Neo4j schema refreshed successfully.`);
+      } catch (schemaError) {
+        console.error("[initialize] Error during schema refresh:", schemaError);
+        // Continue initialization even if schema refresh fails
+        console.log("[initialize] Continuing initialization despite schema refresh failure.");
+      }
 
       // Check and create full-text index if needed
-      console.log("[initialize] Verifying full-text index...");
-      await this.verifyFullTextIndex();
-      console.log("[initialize] Full-text index verified.");
+      try {
+        console.log("[initialize] Verifying full-text index...");
+        await this.verifyFullTextIndex();
+        console.log("[initialize] Full-text index verified.");
+      } catch (indexError) {
+        console.error("[initialize] Error during full-text index verification:", indexError);
+        // Continue without full-text index
+        console.log("[initialize] Continuing without full-text index. Will use fallback search methods.");
+        this.fullTextIndexExists = false;
+      }
 
       this.isReady = true; // Set ready only on full success
       console.log("[initialize] Chatbot initialization successful. Ready with Neo4j backend.");
@@ -109,103 +142,287 @@ class ChatbotServiceV5 {
     }
   }
 
-  private async verifyFullTextIndex(): Promise<void> {
-    const session = this.driver.session();
-    console.log("[verifyFullTextIndex] Checking for index 'allNodesIndex'...");
-    try {
-      const result = await session.run(
-        `SHOW INDEXES WHERE type = 'FULLTEXT' AND name = 'allNodesIndex'`
-      );
+  /**
+   * Attempts to refresh the Neo4j schema with a timeout to prevent hanging
+   * @param timeoutMs Timeout in milliseconds
+   * @returns Promise that resolves when schema is refreshed or rejects on timeout
+   */
+  private async refreshSchemaWithTimeout(timeoutMs: number): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
+      // Set a timeout to reject the promise if schema refresh takes too long
+      const timeout = setTimeout(() => {
+        console.error(`[refreshSchemaWithTimeout] Schema refresh timed out after ${timeoutMs}ms`);
+        reject(new Error(`Schema refresh timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
 
-      if (result.records.length === 0) {
-        console.log("[verifyFullTextIndex] Index 'allNodesIndex' not found. Creating...");
-        await this.createFullTextIndex();
-      } else {
-        console.log("[verifyFullTextIndex] Index 'allNodesIndex' found.");
-        this.fullTextIndexExists = true;
+      try {
+        console.log(`[refreshSchemaWithTimeout] Starting schema refresh with ${timeoutMs}ms timeout`);
+        
+        // Try to refresh the schema
+        await this.neo4jGraph.refreshSchema();
+        
+        // Clear the timeout if successful
+        clearTimeout(timeout);
+        console.log(`[refreshSchemaWithTimeout] Schema refreshed successfully within timeout`);
+        resolve();
+      } catch (error) {
+        // Clear the timeout to prevent rejection after catch
+        clearTimeout(timeout);
+        console.error(`[refreshSchemaWithTimeout] Schema refresh failed with error:`, error);
+        reject(error);
       }
+    });
+  }
+
+  private async verifyFullTextIndex(): Promise<void> {
+    let session: Session | null = null;
+    console.log("[verifyFullTextIndex] Checking for index 'allNodesIndex'...");
+    
+    try {
+      session = this.driver.session();
+      
+      // Add a timeout around the index verification
+      const indexCheckPromise = new Promise<void>(async (resolve, reject) => {
+        const timeout = setTimeout(() => {
+          console.error("[verifyFullTextIndex] Index check timed out after 15 seconds");
+          reject(new Error("Index check timed out"));
+        }, 15000); // 15 second timeout
+        
+        try {
+          if (!session) {
+            clearTimeout(timeout);
+            reject(new Error("Neo4j session is null"));
+            return;
+          }
+          
+          const result = await session.run(
+            `SHOW INDEXES WHERE type = 'FULLTEXT' AND name = 'allNodesIndex'`
+          );
+          
+          clearTimeout(timeout);
+          
+          if (result.records.length === 0) {
+            console.log("[verifyFullTextIndex] Index 'allNodesIndex' not found. Creating...");
+            await this.createFullTextIndex();
+          } else {
+            console.log("[verifyFullTextIndex] Index 'allNodesIndex' found.");
+            this.fullTextIndexExists = true;
+          }
+          resolve();
+        } catch (error) {
+          clearTimeout(timeout);
+          reject(error);
+        }
+      });
+      
+      await indexCheckPromise;
     } catch (error) {
-      console.error("Error verifying full-text index:", error);
+      console.error("[verifyFullTextIndex] Error verifying full-text index:", error);
+      // Set to false to ensure we don't attempt to use it
+      this.fullTextIndexExists = false;
+      throw error;
     } finally {
-      await session.close();
+      if (session) {
+        try {
+          await session.close();
+          console.log("[verifyFullTextIndex] Neo4j session closed.");
+        } catch (closeError) {
+          console.error("[verifyFullTextIndex] Error closing session:", closeError);
+        }
+      }
     }
   }
 
   private async createFullTextIndex(): Promise<void> {
-    const session = this.driver.session();
+    let session: Session | null = null;
     console.log("[createFullTextIndex] Attempting to create index 'allNodesIndex'...");
+    
     try {
-      await session.run(
-        `CREATE FULLTEXT INDEX allNodesIndex 
-         FOR (n:Research|Publication|TeamMember|Student) 
-         ON EACH [n.name, n.title, n.abstract, n.bio, n.authors]`
-      );
-      this.fullTextIndexExists = true;
-      console.log("[createFullTextIndex] Successfully created full-text index 'allNodesIndex'.");
+      session = this.driver.session();
+      
+      // Add a timeout around the index creation
+      const indexCreatePromise = new Promise<void>(async (resolve, reject) => {
+        const timeout = setTimeout(() => {
+          console.error("[createFullTextIndex] Index creation timed out after 20 seconds");
+          reject(new Error("Index creation timed out"));
+        }, 20000); // 20 second timeout
+        
+        try {
+          if (!session) {
+            clearTimeout(timeout);
+            reject(new Error("Neo4j session is null"));
+            return;
+          }
+          
+          await session.run(
+            `CREATE FULLTEXT INDEX allNodesIndex 
+             FOR (n:Research|Publication|TeamMember|Student) 
+             ON EACH [n.name, n.title, n.abstract, n.bio, n.authors]`
+          );
+          
+          clearTimeout(timeout);
+          this.fullTextIndexExists = true;
+          console.log("[createFullTextIndex] Successfully created full-text index 'allNodesIndex'.");
+          resolve();
+        } catch (error) {
+          clearTimeout(timeout);
+          reject(error);
+        }
+      });
+      
+      await indexCreatePromise;
     } catch (error) {
       console.error("[createFullTextIndex] Failed to create full-text index 'allNodesIndex':", error);
       this.fullTextIndexExists = false;
       throw error; // Propagate error to fail initialization if index creation fails
     } finally {
-      await session.close();
+      if (session) {
+        try {
+          await session.close();
+          console.log("[createFullTextIndex] Neo4j session closed.");
+        } catch (closeError) {
+          console.error("[createFullTextIndex] Error closing session:", closeError);
+        }
+      }
     }
   }
 
   public async processQuery(query: string): Promise<string> {
-    console.log(`[processQuery] Received query: "${query}"`); // Added log
+    console.log(`[processQuery] Received query: "${query}"`);
+    
+    // 1. First check if the chatbot is fully initialized
     if (!this.isReady) {
-      console.log("[processQuery] Chatbot not ready, returning initialization message."); // Added log
+      console.log("[processQuery] Chatbot not ready, returning initialization message.");
       return "The chatbot is still initializing. Please try again in a moment.";
     }
 
     try {
-      console.log("[processQuery] Checking Neo4j connection..."); // Added log
-      // If Neo4j connection failed but we're still providing service
-      if (!this.neo4jGraph || !this.driver) {
-        console.log("[processQuery] Neo4j connection unavailable, using fallback."); // Added log
-        return this.generateFallbackResponse(query);
-      }
-      
-      console.log("[processQuery] Starting graph search..."); // Added log
-      const results = await this.searchEntireGraph(query);
-      console.log(`[processQuery] Search completed. Found ${results.length} results.`); // Added log
+      // 2. Setup safety timeouts for the entire query process
+      const queryPromise = new Promise<string>(async (resolve, reject) => {
+        const queryTimeout = setTimeout(() => {
+          console.error("[processQuery] Query processing timed out after 25 seconds");
+          reject(new Error("Query processing timed out"));
+        }, 25000); // 25 second timeout
+        
+        try {
+          console.log("[processQuery] Checking Neo4j connection...");
+          
+          // 3. Check if Neo4j is available, but continue even if not
+          let usingFallback = false;
+          if (!this.neo4jGraph || !this.driver) {
+            console.log("[processQuery] Neo4j connection unavailable, will use fallback.");
+            usingFallback = true;
+          } else {
+            try {
+              // Test Neo4j connection with a quick query
+              await this.driver.verifyConnectivity();
+            } catch (connError) {
+              console.error("[processQuery] Neo4j verification failed:", connError);
+              usingFallback = true;
+            }
+          }
+          
+          // 4. Use fallback immediately if Neo4j is unavailable
+          if (usingFallback) {
+            const fallbackResponse = this.generateFallbackResponse(query, "connection");
+            clearTimeout(queryTimeout);
+            resolve(fallbackResponse);
+            return;
+          }
+          
+          // 5. Attempt graph search with timeout
+          console.log("[processQuery] Starting graph search...");
+          let results: Document[] = [];
+          
+          try {
+            // Wrap search in another promise with timeout
+            const searchPromise = new Promise<Document[]>((resolveSearch, rejectSearch) => {
+              const searchTimeout = setTimeout(() => {
+                console.error("[processQuery] Graph search timed out after 15 seconds");
+                rejectSearch(new Error("Graph search timed out"));
+              }, 15000); // 15 second timeout
+              
+              this.searchEntireGraph(query)
+                .then((searchResults) => {
+                  clearTimeout(searchTimeout);
+                  resolveSearch(searchResults);
+                })
+                .catch((searchError) => {
+                  clearTimeout(searchTimeout);
+                  console.error("[processQuery] Search error:", searchError);
+                  rejectSearch(searchError);
+                });
+            });
+            
+            results = await searchPromise;
+            console.log(`[processQuery] Search completed. Found ${results.length} results.`);
+          } catch (searchError) {
+            console.error("[processQuery] Controlled search error:", searchError);
+            // Check if this was a timeout error
+            const errorMessage = searchError instanceof Error ? searchError.message : String(searchError);
+            if (errorMessage.includes("timed out")) {
+              console.log("[processQuery] Search timed out, using timeout fallback response");
+              const timeoutResponse = this.generateFallbackResponse(query, "timeout");
+              clearTimeout(queryTimeout);
+              resolve(timeoutResponse);
+              return; // Exit early with the timeout response
+            }
+            // Continue with empty results for other errors, will use notfound fallback
+          }
 
-      if (results.length === 0) {
-        console.log("[processQuery] No relevant information found, returning message."); // Added log
-        return "I couldn't find relevant information. Could you try rephrasing your question?";
-      }
+          // 6. Generate response based on search results or fallback
+          let response: string;
+          if (results.length === 0) {
+            console.log("[processQuery] No relevant information found, using fallback response.");
+            response = this.generateFallbackResponse(query, "notfound");
+          } else {
+            try {
+              console.log("[processQuery] Generating response based on search results...");
+              response = await this.generateResponse(query, results);
+              console.log("[processQuery] Response generated successfully.");
+            } catch (responseError) {
+              console.error("[processQuery] Response generation error:", responseError);
+              response = this.generateFallbackResponse(query, "general");
+            }
+          }
+          
+          clearTimeout(queryTimeout);
+          resolve(response);
+        } catch (processingError) {
+          clearTimeout(queryTimeout);
+          console.error("[processQuery] Unexpected processing error:", processingError);
+          reject(processingError);
+        }
+      });
       
-      console.log("[processQuery] Generating response based on search results..."); // Added log
-      const response = await this.generateResponse(query, results);
-      console.log("[processQuery] Response generated successfully."); // Added log
-      return response;
+      // 7. Return result from the promise, with overall timeout
+      return await queryPromise;
     } catch (error) {
-      console.error("[processQuery] Error during query processing:", error); // Enhanced log
-      console.log("[processQuery] Error occurred, generating fallback response."); // Added log
-      return this.generateFallbackResponse(query);
+      console.error("[processQuery] Error during query processing:", error);
+      // Final fallback if everything else fails
+      return this.generateFallbackResponse(query, "general");
     }
   }
 
   private async searchEntireGraph(query: string): Promise<Document[]> {
     try {
-+     console.log("[searchEntireGraph] Attempting search with standard chain..."); // Added log
+      console.log("[searchEntireGraph] Attempting search with standard chain..."); // Added log
       // First try with the standard chain
       const chainResult = await this.chain.invoke({ query });
-+     console.log("[searchEntireGraph] Standard chain invocation complete."); // Added log
+      console.log("[searchEntireGraph] Standard chain invocation complete."); // Added log
       const formatted = this.formatResults(chainResult);
 
       if (formatted.length > 0) {
-+       console.log("[searchEntireGraph] Found results with standard chain."); // Added log
+        console.log("[searchEntireGraph] Found results with standard chain."); // Added log
         return formatted;
       }
 
-+     console.log("[searchEntireGraph] Standard chain yielded no results, falling back to full graph search."); // Added log
+      console.log("[searchEntireGraph] Standard chain yielded no results, falling back to full graph search."); // Added log
       // Fallback to our enhanced search
       return this.fullGraphSearch(query);
     } catch (error) {
--     console.error("Search failed:", error);
-+     console.error("[searchEntireGraph] Error during search:", error); // Enhanced log
-+     console.log("[searchEntireGraph] Search failed, attempting full graph search as fallback."); // Added log
+      console.error("[searchEntireGraph] Error during search:", error); // Enhanced log
+      console.log("[searchEntireGraph] Search failed, attempting full graph search as fallback."); // Added log
       return this.fullGraphSearch(query);
     }
   }
@@ -254,13 +471,13 @@ class ChatbotServiceV5 {
   private async fullGraphSearch(query: string): Promise<Document[]> {
     let session;
     try {
-+     console.log("[fullGraphSearch] Attempting to get Neo4j session..."); // Added log
+      console.log("[fullGraphSearch] Attempting to get Neo4j session..."); // Added log
       session = this.driver.session();
-+     console.log("[fullGraphSearch] Neo4j session acquired."); // Added log
+      console.log("[fullGraphSearch] Neo4j session acquired."); // Added log
 
       if (this.fullTextIndexExists) {
         try {
-+         console.log("[fullGraphSearch] Attempting full-text index search..."); // Added log
+          console.log("[fullGraphSearch] Attempting full-text index search..."); // Added log
           const result = await session.run(
             `CALL db.index.fulltext.queryNodes("allNodesIndex", $query)
                         YIELD node, score
@@ -272,13 +489,12 @@ class ChatbotServiceV5 {
                         RETURN node, r, related, score`,
             { query }
           );
-+         console.log("[fullGraphSearch] Full-text index search complete."); // Added log
+          console.log("[fullGraphSearch] Full-text index search complete."); // Added log
           return this.processSearchResults(result);
         } catch (error) {
--         console.error("Full-text search failed:", error);
-+         console.error("[fullGraphSearch] Full-text search failed:", error); // Enhanced log
+          console.error("[fullGraphSearch] Full-text search failed:", error); // Enhanced log
           this.fullTextIndexExists = false;
-+         console.log("[fullGraphSearch] Full-text search failed, will attempt keyword search."); // Added log
+          console.log("[fullGraphSearch] Full-text search failed, will attempt keyword search."); // Added log
         }
       }
 
@@ -286,11 +502,11 @@ class ChatbotServiceV5 {
       return await this.keywordSearch(query, session);
     } finally {
       if (session !== null && session !== undefined) {
-+       console.log("[fullGraphSearch] Closing Neo4j session."); // Added log
-+       await session?.close();
-+       console.log("[fullGraphSearch] Neo4j session closed."); // Added log
+        console.log("[fullGraphSearch] Closing Neo4j session."); // Added log
+        await session?.close();
+        console.log("[fullGraphSearch] Neo4j session closed."); // Added log
       } else if (!session) {
-+       console.log("[fullGraphSearch] No session to close."); // Added log
+        console.log("[fullGraphSearch] No session to close."); // Added log
       }
     }
   }
@@ -301,7 +517,7 @@ class ChatbotServiceV5 {
   ): Promise<Document[]> {
     const newSession = session || this.driver.session();
     try {
-+     console.log("[keywordSearch] Attempting keyword search..."); // Added log
+      console.log("[keywordSearch] Attempting keyword search..."); // Added log
       const keywords = query.toLowerCase().split(/\s+/);
       const result = await newSession.run(
         `MATCH (n)
@@ -315,17 +531,16 @@ class ChatbotServiceV5 {
                 RETURN n as node, r, related, 1.0 as score`,
         { keywords }
       );
-+     console.log("[keywordSearch] Keyword search complete."); // Added log
+      console.log("[keywordSearch] Keyword search complete."); // Added log
       return this.processSearchResults(result);
     } catch (error) {
--     console.error("Keyword search failed:", error);
-+     console.error("[keywordSearch] Keyword search failed:", error); // Enhanced log
+      console.error("[keywordSearch] Keyword search failed:", error); // Enhanced log
       return [];
     } finally {
       if (!session) {
-+       console.log("[keywordSearch] Closing Neo4j session (created internally)."); // Added log
+        console.log("[keywordSearch] Closing Neo4j session (created internally)."); // Added log
         await newSession.close();
-+       console.log("[keywordSearch] Neo4j session closed."); // Added log
+        console.log("[keywordSearch] Neo4j session closed."); // Added log
       }
     }
   }
@@ -399,18 +614,18 @@ class ChatbotServiceV5 {
     query: string,
     documents: Document[]
   ): Promise<string> {
-+   console.log("[generateResponse] Formatting context for LLM..."); // Added log
+    console.log("[generateResponse] Formatting context for LLM..."); // Added log
     const context = documents
       .map((doc) => `${doc.type.toUpperCase()}: ${doc.content}`)
       .join("\n\n");
 
-+   console.log("[generateResponse] Initializing LLM for response generation..."); // Added log
+    console.log("[generateResponse] Initializing LLM for response generation..."); // Added log
     const llm = new ChatGoogleGenerativeAI({
       model: "gemini-1.5-pro",
       temperature: 0.3,
     });
 
-+   console.log("[generateResponse] Invoking LLM..."); // Added log
+    console.log("[generateResponse] Invoking LLM..."); // Added log
     const response = await llm.invoke([
       {
         role: "system",
@@ -426,37 +641,42 @@ class ChatbotServiceV5 {
         content: query,
       },
     ]);
-+   console.log("[generateResponse] LLM invocation complete."); // Added log
+    console.log("[generateResponse] LLM invocation complete."); // Added log
 
     return response.content.toString();
   }
 
-  private generateFallbackResponse(query: string): string {
-    // This method provides basic responses without needing Neo4j
-    const lowercaseQuery = query.toLowerCase();
+  private generateFallbackResponse(query: string, errorType: string = "general"): string {
+    console.log(`[generateFallbackResponse] Generating fallback for error type: ${errorType}`);
     
-    // Research areas
-    if (lowercaseQuery.includes("research") && (lowercaseQuery.includes("area") || lowercaseQuery.includes("focus"))) {
-      return "The ViBeS Lab focuses on several key research areas including Visual Surveillance, Edge Computing, Generative Models, and Biometrics. Each area represents cutting-edge work in computer vision and AI.";
-    }
+    // Basic information we know without the database
+    const basicInfo = `The Visual Biometrics and Surveillance Lab (ViBeS) is a research group focused on biometrics, computer vision, and surveillance applications.`;
     
-    // Team information
-    if (lowercaseQuery.includes("team") || lowercaseQuery.includes("professor") || lowercaseQuery.includes("faculty")) {
-      return "Our team consists of faculty members, researchers, and students working collaboratively on visual biometrics and surveillance technologies. For detailed profiles, please check the team page on our website.";
-    }
+    // Set of response templates based on error type
+    const responses: { [key: string]: string[] } = {
+      connection: [
+        `I'm having trouble connecting to our knowledge base at the moment, but I can tell you that ${basicInfo} Your question was about "${query}". Please try again in a few minutes when our systems have had time to recover.`,
+        `Our database connection is currently unavailable. ${basicInfo} You asked about "${query}", but I don't have the specific details right now. Please try again soon.`,
+      ],
+      timeout: [
+        `It's taking longer than expected to process your question about "${query}". ${basicInfo} Please try a more specific or differently worded question.`,
+        `Your question is complex and our search is taking too long. ${basicInfo} Could you try asking a more focused question?`,
+      ],
+      notfound: [
+        `I couldn't find specific information about "${query}" in our knowledge base. ${basicInfo} Could you try rephrasing your question?`,
+        `I don't have details about "${query}" in my current dataset. ${basicInfo} Is there something else about the lab you'd like to know?`,
+      ],
+      general: [
+        `I'm sorry, I don't have enough information to answer your question about "${query}" properly. ${basicInfo} Please try asking something else about our lab.`,
+        `I couldn't process your query about "${query}" as expected. ${basicInfo} Please try rephrasing your question.`,
+      ],
+    };
     
-    // Publications
-    if (lowercaseQuery.includes("publication") || lowercaseQuery.includes("paper") || lowercaseQuery.includes("journal")) {
-      return "Our lab has published numerous papers in top conferences and journals. Recent publications focus on advanced computer vision algorithms, biometric systems, and AI-based surveillance. You can find the full publication list on our website.";
-    }
+    // Select appropriate response array based on error type, defaulting to general
+    const responseArray = responses[errorType] || responses.general;
     
-    // Projects
-    if (lowercaseQuery.includes("project") || lowercaseQuery.includes("work")) {
-      return "Current projects at ViBeS Lab include developing privacy-preserving surveillance systems, efficient biometric recognition for edge devices, and novel applications of generative AI for synthetic data generation.";
-    }
-    
-    // Default response
-    return "I'm currently operating with limited functionality. I can provide general information about our research lab, but for specific details, please browse the website sections or try again later when full functionality is restored.";
+    // Select a random response from the appropriate category
+    return responseArray[Math.floor(Math.random() * responseArray.length)];
   }
 
   public async close() {
