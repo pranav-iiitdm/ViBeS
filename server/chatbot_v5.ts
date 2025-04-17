@@ -112,7 +112,7 @@ class ChatbotServiceV5 {
       console.log("[initialize] Refreshing Neo4j schema...");
       try {
         // Use the new timeout method instead
-        await this.refreshSchemaWithTimeout(30000); // 30 seconds timeout
+        // await this.refreshSchemaWithTimeout(30000); // 30 seconds timeout
         console.log(`[initialize] Neo4j schema refreshed successfully.`);
       } catch (schemaError) {
         console.error("[initialize] Error during schema refresh:", schemaError);
