@@ -20,10 +20,22 @@ export async function POST(request: Request) {
             const response = await chatbot.processQuery(text.trim());
             
             // Check if response indicates initialization or other known issues
+            if (typeof response !== 'string') {
+                console.error('Chatbot service returned unexpected response type:', typeof response, response);
+                return new Response(JSON.stringify({
+                    error: 'Internal Server Error',
+                    message: 'Received unexpected response format from chatbot service.'
+                }), {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+
             if (response.includes('still initializing')) {
+                console.warn('Chatbot service reported: still initializing');
                 return new Response(JSON.stringify({
                     error: 'Service Unavailable',
-                    message: response,
+                    message: response, // Keep original message
                     retryAfter: 5
                 }), {
                     status: 503,
@@ -34,30 +46,45 @@ export async function POST(request: Request) {
                 });
             }
             
-            if (response.includes('not properly initialized')) {
+            // Add more specific checks if chatbotServicev5 provides them
+            if (response.includes('not properly initialized') || response.includes('Neo4j not available')) {
+                 console.error('Chatbot service reported initialization or connection error:', response);
                 return new Response(JSON.stringify({
                     error: 'Service Configuration Error',
-                    message: response
+                    message: 'Chatbot service is not properly configured or connected.' // More generic message to client
                 }), {
-                    status: 500,
+                    status: 500, // Internal error, not just unavailable
                     headers: { 'Content-Type': 'application/json' },
                 });
             }
 
+            // Success case
             return new Response(JSON.stringify({ response }), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' },
             });
+
         } catch (error) {
-            console.error('Chatbot processing error:', error);
+            // Log the specific error from processQuery
+            console.error('Error during chatbot.processQuery:', error);
+            
+            // Determine the status code based on the error if possible
+            // For now, stick to 503 as it indicates a backend service issue
+            let statusCode = 503;
+            let errorMessage = 'Chatbot processing error';
+            let retryAfter = '5'; // Default retry
+
+            // Customize based on potential error types if needed in the future
+            // if (error instanceof Neo4jError) { ... }
+
             return new Response(JSON.stringify({ 
-                error: 'Chatbot processing error',
-                details: error instanceof Error ? error.message : String(error)
+                error: errorMessage,
+                details: error instanceof Error ? error.message : String(error) // Provide error details for server logs
             }), {
-                status: 503,
+                status: statusCode,
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Retry-After': '5'
+                    'Retry-After': retryAfter
                 },
             });
         }
