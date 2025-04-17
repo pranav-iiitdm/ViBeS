@@ -141,42 +141,60 @@ class ChatbotServiceV5 {
   }
 
   public async processQuery(query: string): Promise<string> {
+    console.log(`[processQuery] Received query: "${query}"`); // Added log
     if (!this.isReady) {
+      console.log("[processQuery] Chatbot not ready, returning initialization message."); // Added log
       return "The chatbot is still initializing. Please try again in a moment.";
     }
 
     try {
+      console.log("[processQuery] Checking Neo4j connection..."); // Added log
       // If Neo4j connection failed but we're still providing service
       if (!this.neo4jGraph || !this.driver) {
-        console.log("Using fallback response system (Neo4j not available)");
+        console.log("[processQuery] Neo4j connection unavailable, using fallback."); // Added log
         return this.generateFallbackResponse(query);
       }
       
+      console.log("[processQuery] Starting graph search..."); // Added log
       const results = await this.searchEntireGraph(query);
+      console.log(`[processQuery] Search completed. Found ${results.length} results.`); // Added log
+
       if (results.length === 0) {
+        console.log("[processQuery] No relevant information found, returning message."); // Added log
         return "I couldn't find relevant information. Could you try rephrasing your question?";
       }
-      return this.generateResponse(query, results);
+      
+      console.log("[processQuery] Generating response based on search results..."); // Added log
+      const response = await this.generateResponse(query, results);
+      console.log("[processQuery] Response generated successfully."); // Added log
+      return response;
     } catch (error) {
-      console.error("Error processing query:", error);
+      console.error("[processQuery] Error during query processing:", error); // Enhanced log
+      console.log("[processQuery] Error occurred, generating fallback response."); // Added log
       return this.generateFallbackResponse(query);
     }
   }
 
   private async searchEntireGraph(query: string): Promise<Document[]> {
     try {
++     console.log("[searchEntireGraph] Attempting search with standard chain..."); // Added log
       // First try with the standard chain
       const chainResult = await this.chain.invoke({ query });
++     console.log("[searchEntireGraph] Standard chain invocation complete."); // Added log
       const formatted = this.formatResults(chainResult);
 
       if (formatted.length > 0) {
++       console.log("[searchEntireGraph] Found results with standard chain."); // Added log
         return formatted;
       }
 
++     console.log("[searchEntireGraph] Standard chain yielded no results, falling back to full graph search."); // Added log
       // Fallback to our enhanced search
       return this.fullGraphSearch(query);
     } catch (error) {
-      console.error("Search failed:", error);
+-     console.error("Search failed:", error);
++     console.error("[searchEntireGraph] Error during search:", error); // Enhanced log
++     console.log("[searchEntireGraph] Search failed, attempting full graph search as fallback."); // Added log
       return this.fullGraphSearch(query);
     }
   }
@@ -225,10 +243,13 @@ class ChatbotServiceV5 {
   private async fullGraphSearch(query: string): Promise<Document[]> {
     let session;
     try {
++     console.log("[fullGraphSearch] Attempting to get Neo4j session..."); // Added log
       session = this.driver.session();
++     console.log("[fullGraphSearch] Neo4j session acquired."); // Added log
 
       if (this.fullTextIndexExists) {
         try {
++         console.log("[fullGraphSearch] Attempting full-text index search..."); // Added log
           const result = await session.run(
             `CALL db.index.fulltext.queryNodes("allNodesIndex", $query)
                         YIELD node, score
@@ -240,17 +261,26 @@ class ChatbotServiceV5 {
                         RETURN node, r, related, score`,
             { query }
           );
++         console.log("[fullGraphSearch] Full-text index search complete."); // Added log
           return this.processSearchResults(result);
         } catch (error) {
-          console.error("Full-text search failed:", error);
+-         console.error("Full-text search failed:", error);
++         console.error("[fullGraphSearch] Full-text search failed:", error); // Enhanced log
           this.fullTextIndexExists = false;
++         console.log("[fullGraphSearch] Full-text search failed, will attempt keyword search."); // Added log
         }
       }
 
       // If we get here, either index doesn't exist or full-text search failed
       return await this.keywordSearch(query, session);
     } finally {
-      await session?.close();
+      if (session !== null && session !== undefined) {
++       console.log("[fullGraphSearch] Closing Neo4j session."); // Added log
++       await session?.close();
++       console.log("[fullGraphSearch] Neo4j session closed."); // Added log
+      } else if (!session) {
++       console.log("[fullGraphSearch] No session to close."); // Added log
+      }
     }
   }
 
@@ -260,6 +290,7 @@ class ChatbotServiceV5 {
   ): Promise<Document[]> {
     const newSession = session || this.driver.session();
     try {
++     console.log("[keywordSearch] Attempting keyword search..."); // Added log
       const keywords = query.toLowerCase().split(/\s+/);
       const result = await newSession.run(
         `MATCH (n)
@@ -273,13 +304,17 @@ class ChatbotServiceV5 {
                 RETURN n as node, r, related, 1.0 as score`,
         { keywords }
       );
++     console.log("[keywordSearch] Keyword search complete."); // Added log
       return this.processSearchResults(result);
     } catch (error) {
-      console.error("Keyword search failed:", error);
+-     console.error("Keyword search failed:", error);
++     console.error("[keywordSearch] Keyword search failed:", error); // Enhanced log
       return [];
     } finally {
       if (!session) {
++       console.log("[keywordSearch] Closing Neo4j session (created internally)."); // Added log
         await newSession.close();
++       console.log("[keywordSearch] Neo4j session closed."); // Added log
       }
     }
   }
@@ -353,15 +388,18 @@ class ChatbotServiceV5 {
     query: string,
     documents: Document[]
   ): Promise<string> {
++   console.log("[generateResponse] Formatting context for LLM..."); // Added log
     const context = documents
       .map((doc) => `${doc.type.toUpperCase()}: ${doc.content}`)
       .join("\n\n");
 
++   console.log("[generateResponse] Initializing LLM for response generation..."); // Added log
     const llm = new ChatGoogleGenerativeAI({
       model: "gemini-1.5-pro",
       temperature: 0.3,
     });
 
++   console.log("[generateResponse] Invoking LLM..."); // Added log
     const response = await llm.invoke([
       {
         role: "system",
@@ -377,6 +415,7 @@ class ChatbotServiceV5 {
         content: query,
       },
     ]);
++   console.log("[generateResponse] LLM invocation complete."); // Added log
 
     return response.content.toString();
   }
