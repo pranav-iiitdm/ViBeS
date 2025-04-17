@@ -1,4 +1,4 @@
-import { GraphCypherQAChain } from "langchain/chains/graph_qa/cypher";
+import { GraphCypherQAChain } from "@langchain/community/chains/graph_qa/cypher";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 import { Driver, session as neo4jSession, Record } from "neo4j-driver";
