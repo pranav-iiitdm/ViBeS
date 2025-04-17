@@ -629,12 +629,35 @@ class ChatbotServiceV5 {
     const response = await llm.invoke([
       {
         role: "system",
-        content: `You are a research assistant analyzing graph database results.
-        Provide concise, accurate responses based on the context.
-        Highlight relationships between entities when relevant.
+        // content: `You are a research assistant analyzing graph database results.
+        // Provide concise, accurate responses based on the context.
+        // Highlight relationships between entities when relevant.
+
+        // Also provide the links if present in the context as linkName: linkURL.
         
+        // Context:
+        // ${context}`,
+        content: `You are a research assistant analyzing graph database results. Follow these guidelines:
+
+        1. Provide concise, accurate responses based strictly on the context
+        2. Highlight relationships between entities when relevant
+        3. For all external links found in the context:
+          - Display them prominently at the end of your response
+          - Format each as "[🔗 linkName](linkURL)" (in markdown format)
+          - Group related links together under headings when applicable
+        4. For internal website paths, format as "[📍 pathName](pathURL)"
+        5. If multiple links exist for the same resource, show the most relevant 1-2
+
         Context:
-        ${context}`,
+        ${context}
+
+        Response format:
+        [Your analysis of the information and relationships]
+
+        Relevant Links:
+        [🔗 Link1 Name](link1URL)
+        [🔗 Link2 Name](link2URL)
+        [📍 Internal Page Name](internalPath)`
       },
       {
         role: "user",
