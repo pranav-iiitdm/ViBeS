@@ -59,7 +59,8 @@ class ChatbotServiceV5 {
 
   private async initialize(): Promise<void> {
     try {
-      console.log("Initializing chatbot with Neo4j...");
+      console.log("[initialize] Starting chatbot initialization...");
+      this.isReady = false; // Ensure isReady is false until success
       
       // Add connection timeout and retry
       let connected = false;
@@ -83,37 +84,44 @@ class ChatbotServiceV5 {
       }
       
       if (!connected) {
-        console.error("Failed to connect to Neo4j after multiple attempts");
-        // Still set isReady so we can provide a fallback experience
-        this.isReady = true;
-        return;
+        console.error("[initialize] Failed to connect to Neo4j after multiple attempts. Initialization failed.");
+        // Do NOT set isReady to true here
+        // this.isReady = false; // Already set at the start
+        throw new Error("Failed to connect to Neo4j database."); // Throw to reject the promise
       }
       
+      console.log("[initialize] Refreshing Neo4j schema...");
       await this.neo4jGraph.refreshSchema();
+      console.log("[initialize] Neo4j schema refreshed.");
 
       // Check and create full-text index if needed
+      console.log("[initialize] Verifying full-text index...");
       await this.verifyFullTextIndex();
+      console.log("[initialize] Full-text index verified.");
 
-      this.isReady = true;
-      console.log("Chatbot ready with Neo4j backend");
+      this.isReady = true; // Set ready only on full success
+      console.log("[initialize] Chatbot initialization successful. Ready with Neo4j backend.");
     } catch (error) {
-      console.error("Initialization failed:", error);
-      // Set isReady to true anyway so we can provide a fallback experience
-      this.isReady = true;
+      console.error("[initialize] Initialization failed overall:", error);
+      this.isReady = false; // Ensure isReady is false on any error
+      // Re-throw the error so the initializationPromise rejects
+      throw error;
     }
   }
 
   private async verifyFullTextIndex(): Promise<void> {
     const session = this.driver.session();
+    console.log("[verifyFullTextIndex] Checking for index 'allNodesIndex'...");
     try {
       const result = await session.run(
         `SHOW INDEXES WHERE type = 'FULLTEXT' AND name = 'allNodesIndex'`
       );
 
       if (result.records.length === 0) {
-        console.log("Creating full-text index...");
+        console.log("[verifyFullTextIndex] Index 'allNodesIndex' not found. Creating...");
         await this.createFullTextIndex();
       } else {
+        console.log("[verifyFullTextIndex] Index 'allNodesIndex' found.");
         this.fullTextIndexExists = true;
       }
     } catch (error) {
@@ -125,6 +133,7 @@ class ChatbotServiceV5 {
 
   private async createFullTextIndex(): Promise<void> {
     const session = this.driver.session();
+    console.log("[createFullTextIndex] Attempting to create index 'allNodesIndex'...");
     try {
       await session.run(
         `CREATE FULLTEXT INDEX allNodesIndex 
@@ -132,10 +141,11 @@ class ChatbotServiceV5 {
          ON EACH [n.name, n.title, n.abstract, n.bio, n.authors]`
       );
       this.fullTextIndexExists = true;
-      console.log("Created full-text index 'allNodesIndex'");
+      console.log("[createFullTextIndex] Successfully created full-text index 'allNodesIndex'.");
     } catch (error) {
-      console.error("Failed to create full-text index:", error);
+      console.error("[createFullTextIndex] Failed to create full-text index 'allNodesIndex':", error);
       this.fullTextIndexExists = false;
+      throw error; // Propagate error to fail initialization if index creation fails
     } finally {
       await session.close();
     }
