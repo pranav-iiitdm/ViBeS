@@ -17,7 +17,9 @@ export async function POST(request: Request) {
         }
 
         try {
+            console.log("[API] Calling chatbot.ensureInitialized()...");
             await chatbot.ensureInitialized(); // Wait for initialization
+            console.log("[API] chatbot.ensureInitialized() complete.");
             const response = await chatbot.processQuery(text.trim());
             
             // Check if response indicates initialization or other known issues
