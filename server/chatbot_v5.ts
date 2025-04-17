@@ -494,3 +494,4 @@ class ChatbotServiceV5 {
 }
 
 export const chatbotServicev5 = new ChatbotServiceV5();
+export const chatbotServicev5Ready = chatbotServicev5.ensureInitialized();

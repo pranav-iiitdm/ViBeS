@@ -1,10 +1,12 @@
-import { chatbotServicev5 } from '../server/chatbot_v5';
+import { chatbotServicev5, chatbotServicev5Ready } from '../server/chatbot_v5';
 
 // Initialize chatbot
 const chatbot = chatbotServicev5;
 
 export async function POST(request: Request) {
     try {
+        // Ensure chatbot is fully initialized before handling any requests
+        await chatbotServicev5Ready;
         const { text } = await request.json();
         
         if (!text || typeof text !== 'string' || text.trim().length === 0) {
