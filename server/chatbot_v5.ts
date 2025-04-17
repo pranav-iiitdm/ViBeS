@@ -123,7 +123,7 @@ class ChatbotServiceV5 {
       // Check and create full-text index if needed
       try {
         console.log("[initialize] Verifying full-text index...");
-        await this.verifyFullTextIndex();
+        // await this.verifyFullTextIndex();
         console.log("[initialize] Full-text index verified.");
       } catch (indexError) {
         console.error("[initialize] Error during full-text index verification:", indexError);
